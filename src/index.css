@@ -1,0 +1,13 @@
+@import "tailwindcss";
+/* 🌍 Default text */
+
+/* Fonts */
+@layer base {
+  html {
+    font-family: 'Nunito', sans-serif;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
