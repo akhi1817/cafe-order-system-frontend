@@ -46,21 +46,24 @@ const AdminDashboard = () => {
   };
 
   // Fetch Orders (Optimized)
-  const fetchOrders = useCallback(async () => {
-    try {
-      const res = await axios.get(API_ENDPOINTS.GET_ALL_ORDERS, { withCredentials: true });
-      const allOrders = res.data?.data || [];
+const fetchOrders = useCallback(async () => {
+  try {
+    const res = await axios.get(API_ENDPOINTS.GET_ALL_ORDERS, { withCredentials: true });
+    const allOrders = res.data?.data || [];
 
-      const pending = allOrders.filter(
-        (o) => o.status !== "Completed" || o.paymentStatus !== "Paid"
-      );
+    // Include orders that are Pending or Preparing, exclude Completed or Cancelled
+    const pending = allOrders.filter(
+      o => o.status !== "Completed" && o.status !== "Cancelled"
+    );
 
-      setPendingOrdersCount(pending.length);
-    } catch (err) {
-      console.error("Failed to fetch orders", err);
-      setPendingOrdersCount(0);
-    }
-  }, []);
+    setPendingOrdersCount(pending.length);
+  } catch (err) {
+    console.error("Failed to fetch orders", err);
+    setPendingOrdersCount(0);
+  }
+}, []);
+
+
 
   // Live updates every 5 seconds (fixed infinite re-render issue)
   useEffect(() => {

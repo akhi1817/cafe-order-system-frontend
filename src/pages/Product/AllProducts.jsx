@@ -68,6 +68,7 @@ const AllProducts = ({ refresh, onChange }) => {
             limit: LIMIT,
             search: search || undefined,
             category: category || undefined,
+            includeInactive: true,
           },
           signal: controller.signal,
         });

@@ -53,6 +53,9 @@ TOGGLE_TABLE_STATUS: (id) => `${baseurl}/api/table/${id}/toggle-status`, // PATC
   //delete all orders
   DELETE_ALL_ORDERS: `${baseurl}/api/orders/delete-all`,
 
+  //delete one order
+  DELETE_ORDER: (id) => `${baseurl}/api/orders/delete-order/${id}`,
+
   // 🟣 Reports (History)
   GET_ORDER_REPORTS: `${baseurl}/api/orders/reports`,
 };

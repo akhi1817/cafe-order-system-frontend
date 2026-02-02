@@ -98,12 +98,27 @@ const AllOrders = ({ refresh, onUpdate }) => {
        Dashboard Stats
   =========================== */
   const stats = {
-    Pending: orders.filter(o => o.status === "Pending").length,
-    Preparing: orders.filter(o => o.status === "Preparing").length,
-    "In Progress": orders.filter(o => o.status === "In Progress").length,
-    Completed: orders.filter(o => o.status === "Completed").length,
-    Revenue: orders.filter(o => o.paymentStatus === "Paid").reduce((acc,o)=>acc+o.totalAmount,0),
-  };
+  Pending: orders.filter(o => o.status === "Pending").length,
+  Preparing: orders.filter(o => o.status === "Preparing").length,
+  Completed: orders.filter(o => o.status === "Completed").length,
+  Cancelled: orders.filter(o => o.status === "Cancelled").length,
+  Revenue: orders.filter(o => o.paymentStatus === "Paid").reduce((acc,o)=>acc+o.totalAmount,0),
+};
+
+const handleDeleteOrder = async (orderId) => {
+  if (!window.confirm("⚠️ Are you sure you want to delete this order?")) return;
+
+  try {
+    await axios.delete(API_ENDPOINTS.DELETE_ORDER(orderId), { withCredentials: true });
+    toast.success("Order deleted successfully");
+    fetchOrders();
+    onUpdate?.();
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Failed to delete order");
+  }
+};
+
+
 
   return (
     <div className="p-4">
@@ -143,8 +158,24 @@ const AllOrders = ({ refresh, onUpdate }) => {
                   <p className="text-xs text-green-800 mt-1">🕒 {timeAgo(order.createdAt)} • {formatOrderTime(order.createdAt)}</p>
                 </div>
                 <div className="flex flex-col gap-1 items-end">
-                  <span className={`px-2 py-1 text-xs rounded-full font-semibold ${order.status==="Completed"?"bg-green-200 text-green-900":order.status==="Preparing"?"bg-yellow-200 text-green-900":"bg-green-100 text-green-800"}`}>{order.status}</span>
-                  <span className={`px-2 py-1 text-xs rounded-full font-semibold ${order.paymentStatus==="Paid"?"bg-green-200 text-green-900":"bg-red-200 text-red-900"}`}>{order.paymentStatus}</span>
+{/* Status Badge */}
+<span className={`px-2 py-1 text-xs rounded-full font-semibold 
+  ${order.status === "Completed" ? "bg-green-200 text-green-900" :
+    order.status === "Preparing" ? "bg-yellow-200 text-green-900" :
+    order.status === "Cancelled" ? "bg-red-200 text-red-900" :
+    "bg-green-100 text-green-800"
+  }`}>
+  {order.status}
+</span>
+
+{/* Payment Badge only if NOT Cancelled */}
+{order.status !== "Cancelled" && (
+  <span className={`px-2 py-1 text-xs rounded-full font-semibold ${
+    order.paymentStatus === "Paid" ? "bg-green-200 text-green-900" : "bg-red-200 text-red-900"
+  }`}>
+    {order.paymentStatus}
+  </span>
+)}
                 </div>
               </div>
 
@@ -165,16 +196,55 @@ const AllOrders = ({ refresh, onUpdate }) => {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2 flex-wrap">
-                {order.status !== "Completed" && (
-                  <>
-                    {order.status==="Pending" && <button onClick={()=>updateOrder(order._id,{status:"Preparing"})} className="px-3 py-1 bg-yellow-400 rounded-md text-sm font-semibold">Start Preparing</button>}
-                    {order.status==="Preparing" && <button onClick={()=>updateOrder(order._id,{status:"In Progress"})} className="px-3 py-1 bg-green-400 rounded-md text-sm font-semibold">In Progress</button>}
-                    {order.status==="In Progress" && <button onClick={()=>updateOrder(order._id,{status:"Completed"})} className="px-3 py-1 bg-green-600 rounded-md text-sm font-semibold text-white">Complete</button>}
-                  </>
-                )}
-                {order.paymentStatus==="Unpaid" && <button onClick={()=>updateOrder(order._id,{paymentStatus:"Paid"})} className="px-3 py-1 bg-green-500 rounded-md text-sm font-semibold text-white">Mark as Paid</button>}
-              </div>
+             <div className="flex gap-2 flex-wrap">
+  {/* Status / Payment buttons */}
+  {order.status !== "Completed" && order.status !== "Cancelled" && (
+    <>
+      {order.status === "Pending" && (
+        <>
+          <button
+            onClick={() => updateOrder(order._id, { status: "Preparing" })}
+            className="px-3 py-1 bg-yellow-400 rounded-md text-sm font-semibold"
+          >
+            Start Preparing
+          </button>
+          <button
+            onClick={() => updateOrder(order._id, { status: "Cancelled" })}
+            className="px-3 py-1 bg-red-500 rounded-md text-sm font-semibold text-white"
+          >
+            Cancel Order
+          </button>
+        </>
+      )}
+      {order.status === "Preparing" && (
+        <button
+          onClick={() => updateOrder(order._id, { status: "Completed" })}
+          className="px-3 py-1 bg-green-600 rounded-md text-sm font-semibold text-white"
+        >
+          Complete
+        </button>
+      )}
+     
+    </>
+  )}
+   {order.paymentStatus === "Unpaid" &&  order.status !== "Cancelled" && (
+        <button
+          onClick={() => updateOrder(order._id, { paymentStatus: "Paid" })}
+          className="px-3 py-1 bg-green-500 rounded-md text-sm font-semibold text-white"
+        >
+          Mark as Paid
+        </button>
+      )}
+
+  {/* ✅ Delete button (always visible) */}
+  <button
+    onClick={() => handleDeleteOrder(order._id)}
+    className="px-3 py-1 bg-red-600 rounded-md text-sm font-semibold text-white"
+  >
+    Delete
+  </button>
+</div>
+
 
             </div>
           ))}

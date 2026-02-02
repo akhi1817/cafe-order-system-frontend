@@ -13,8 +13,8 @@ export default function OrderReports({ refresh }) {
   const itemsPerPage = 10;
 
   const cafeInfo = {
-    name: "Demo Cafe",
-    address: "123, Coffee Street, Demo City",
+    name: "Café Aurora",
+    address: "Pimpri",
     mobile: "9876543210",
   };
 
@@ -25,6 +25,7 @@ export default function OrderReports({ refresh }) {
         params: { fromDate, toDate },
         withCredentials: true,
       });
+      console.log(res.data)
       setOrders(res.data.data || []);
       setCurrentPage(1); // reset page on new fetch
     } catch {
@@ -86,16 +87,7 @@ export default function OrderReports({ refresh }) {
     billWindow.print();
   };
 
-  const deleteOrder = async (orderId) => {
-    if (!window.confirm("⚠️ Are you sure you want to delete this order?")) return;
-    try {
-      await axios.delete(API_ENDPOINTS.DELETE_ORDER(orderId), { withCredentials: true });
-      toast.success("Order deleted successfully");
-      setOrders(prev => prev.filter(o => o._id !== orderId));
-    } catch {
-      toast.error("Failed to delete order");
-    }
-  };
+
 
   // Pagination logic
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -125,14 +117,7 @@ export default function OrderReports({ refresh }) {
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-3 mb-6 items-start md:items-center">
-        <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
-          className="border border-green-200 px-3 py-2 rounded w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-green-400"/>
-        <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-          className="border border-green-200 px-3 py-2 rounded w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-green-400"/>
-        <button onClick={fetchReports} className="bg-green-400 text-white px-4 py-2 rounded-lg shadow hover:bg-green-500 transition text-sm md:text-base">Apply</button>
-      </div>
+      
 
       {/* Orders Table */}
       <div className="overflow-x-auto rounded-2xl shadow border border-green-200">
@@ -141,12 +126,11 @@ export default function OrderReports({ refresh }) {
             <tr>
               <th className="p-2 text-left font-medium text-green-900">#</th>
               <th className="p-2 text-left font-medium text-green-900">Type</th>
-              <th className="p-2 text-left font-medium text-green-900">Table</th>
               <th className="p-2 text-left font-medium text-green-900">Items</th>
               <th className="p-2 text-left font-medium text-green-900">Amount</th>
               <th className="p-2 text-left font-medium text-green-900">Status</th>
               <th className="p-2 text-left font-medium text-green-900">Payment</th>
-              <th className="p-2 text-left font-medium text-green-900">Time</th>
+              <th className="p-2 text-left font-medium text-green-900">Date & Time</th>
               <th className="p-2 text-left font-medium text-green-900">Actions</th>
             </tr>
           </thead>
@@ -164,7 +148,6 @@ export default function OrderReports({ refresh }) {
                 <tr key={order._id} className="hover:bg-green-50">
                   <td className="p-2">{(currentPage-1)*itemsPerPage + index + 1}</td>
                   <td className="p-2">{order.orderType}</td>
-                  <td className="p-2">{order.table?.tableNumber || "-"}</td>
                   <td className="p-2 max-w-[150px] truncate">{order.items.map(i => `${i.name} x${i.quantity}`).join(", ")}</td>
                   <td className="p-2 font-medium">₹{order.totalAmount}</td>
                   <td className="p-2">
@@ -176,7 +159,6 @@ export default function OrderReports({ refresh }) {
                   <td className="p-2 text-[10px] md:text-sm">{new Date(order.createdAt).toLocaleString()}</td>
                   <td className="p-2 flex gap-1 flex-wrap">
                     <button onClick={() => printBill(order)} className="px-2 py-1 bg-green-400 text-white text-xs rounded hover:bg-green-500 transition">Print</button>
-                    <button onClick={() => deleteOrder(order._id)} className="px-2 py-1 bg-red-400 text-white text-xs rounded hover:bg-red-500 transition">Delete</button>
                   </td>
                 </tr>
               ))
