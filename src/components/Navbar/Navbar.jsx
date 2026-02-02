@@ -113,7 +113,7 @@ const Navbar = () => {
           ))}
 
           {/* Logout Only (Login removed) */}
-          {isLoggedIn && (
+          {/* {isLoggedIn && (
             <button
               onClick={() => {
                 handleLogout();
@@ -123,7 +123,7 @@ const Navbar = () => {
             >
               Logout
             </button>
-          )}
+          )} */}
         </div>
       )}
     </nav>
