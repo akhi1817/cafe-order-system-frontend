@@ -1,18 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import API_ENDPOINTS from "../../config/api";
 import { toast } from "sonner";
 import { Outlet, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
+// 🌟 Shimmer Component (Fixed tailwind dynamic class issues)
+const Shimmer = ({ width = "w-full", height = "h-6", rounded = "rounded-xl", className = "" }) => (
+  <div className={`relative ${width} ${height} ${rounded} bg-green-100 overflow-hidden ${className}`}>
+    <motion.div
+      initial={{ x: "-100%" }}
+      animate={{ x: "100%" }}
+      transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+      className="absolute inset-0 w-1/2 bg-linear-to-r from-transparent via-green-300 to-transparent"
+    />
+  </div>
+);
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
-  const [lastOrderIds, setLastOrderIds] = useState([]);
 
-  // 👇 Logout handler
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(null);
+
+  // Sidebar Items (memoized for no rerenders)
+  const sidebarItems = useMemo(
+    () => [
+      { title: "Tables", route: "/admin-dashboard/tables" },
+      { title: "Categories", route: "/admin-dashboard/categories" },
+      { title: "Products", route: "/admin-dashboard/products" },
+      { title: "Orders", route: "/admin-dashboard/orders" },
+    ],
+    []
+  );
+
+  // Logout Handler
   const handleLogout = async () => {
     try {
       await axios.get(API_ENDPOINTS.LOGOUT_USER, { withCredentials: true });
@@ -23,114 +45,92 @@ const AdminDashboard = () => {
     }
   };
 
-  // 👇 Sidebar menu items
-  const sidebarItems = [
-    { title: "Tables", route: "/admin-dashboard/tables" },
-    { title: "Orders", route: "/admin-dashboard/orders" },
-    { title: "Categories", route: "/admin-dashboard/categories" },
-    { title: "Products", route: "/admin-dashboard/products" },
-  ];
+  // Fetch Orders (Optimized)
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.GET_ALL_ORDERS, { withCredentials: true });
+      const allOrders = res.data?.data || [];
 
-  /* ===============================
-     LIVE ORDER POLLING & TOAST
-  =============================== */
+      const pending = allOrders.filter(
+        (o) => o.status !== "Completed" || o.paymentStatus !== "Paid"
+      );
+
+      setPendingOrdersCount(pending.length);
+    } catch (err) {
+      console.error("Failed to fetch orders", err);
+      setPendingOrdersCount(0);
+    }
+  }, []);
+
+  // Live updates every 5 seconds (fixed infinite re-render issue)
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get(API_ENDPOINTS.GET_ALL_ORDERS, { withCredentials: true });
-        const allOrders = res.data?.data || [];
-
-        // 👇 Count pending orders (not completed OR not paid)
-        const pendingOrders = allOrders.filter(
-          o => o.status !== "Completed" || o.paymentStatus !== "Paid"
-        );
-        setPendingOrdersCount(pendingOrders.length);
-
-        // 👇 Detect new orders
-        const currentOrderIds = allOrders.map(o => o._id);
-        const newOrders = currentOrderIds.filter(id => !lastOrderIds.includes(id));
-
-        // if (newOrders.length > 0) {
-        //   toast.success(`📢 ${newOrders.length} new order(s) received!`);
-        // }
-
-        setLastOrderIds(currentOrderIds);
-      } catch (err) {
-        console.error("Failed to fetch orders for live update", err);
-      }
-    };
-
-    // Initial fetch
     fetchOrders();
-
-    // Poll every 5 seconds
     const interval = setInterval(fetchOrders, 5000);
-
     return () => clearInterval(interval);
-  }, [lastOrderIds]);
+  }, [fetchOrders]);
 
   return (
     <>
-      {/* 📱 Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-gray-800 text-white flex items-center px-4 py-3 z-50">
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-linear-to-r from-green-300 to-green-50 text-green-900 flex items-center px-4 py-3 z-50">
         <button onClick={() => setMobileOpen(true)} className="text-2xl">☰</button>
-        <span className="ml-4 font-bold">Admin Panel</span>
+        <span className="ml-4 font-bold text-lg">Admin Panel</span>
       </div>
 
-      <div className="mt-14 md:mt-0 flex min-h-screen bg-gray-100">
+      <div className="mt-14 md:mt-0 flex min-h-screen bg-green-50">
         {/* Sidebar */}
-        <div
-          className={`
-            bg-gray-800 text-white flex flex-col
-            fixed md:static top-0 left-0 h-full z-50
-            w-48 md:w-64
-            transform transition-transform duration-300
-            ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-            md:translate-x-0
-          `}
+        <aside
+          className={`flex flex-col fixed md:static top-0 left-0 h-full z-50 w-48 md:w-64 transform transition-transform duration-300
+            bg-linear-to-b from-green-300 to-green-50 text-green-900
+            ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
         >
-          <div className="p-4 md:p-6 text-center font-bold text-lg md:text-xl border-b border-gray-700">
-           Admin Panel
+          <div className="p-6 text-center font-bold text-xl border-b border-green-400">
+            {pendingOrdersCount === null ? <Shimmer width="w-1/2" /> : "Admin Panel"}
           </div>
 
-          <ul className="flex-1 p-3 md:p-4 space-y-2">
+          <ul className="flex-1 p-4 space-y-2">
             {sidebarItems.map((item) => (
               <li key={item.title}>
                 <button
-                  onClick={() => {
-                    navigate(item.route);
-                    setMobileOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 rounded hover:bg-gray-700 transition text-sm md:text-base flex justify-between items-center"
+                  onClick={() => { navigate(item.route); setMobileOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded hover:bg-green-100 hover:text-green-900 transition flex justify-between items-center font-semibold"
                 >
-                  <span>{item.title}</span>
-                  {/* Pending Orders Badge */}
-                  {item.title === "Orders" && pendingOrdersCount > 0 && (
-  <motion.span
-    animate={{ scale: [1, 1.2, 1] }}
-    transition={{ duration: 1, repeat: Infinity }}
-    className="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full"
-  >
-    {pendingOrdersCount}
-  </motion.span>
-)}
+                  {pendingOrdersCount === null ? (
+                    <Shimmer width="w-2/3" height="h-5" />
+                  ) : (
+                    <span>{item.title}</span>
+                  )}
 
+                  {/* Pending Orders Badge */}
+                  {item.title === "Orders" && (
+                    <motion.span
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                      className={`text-xs px-2 py-0.5 rounded-full font-semibold 
+                        ${pendingOrdersCount === null
+                          ? "bg-green-100 text-green-300 animate-pulse"
+                          : "bg-red-600 text-white"
+                        }`}
+                    >
+                      {pendingOrdersCount === null ? "" : pendingOrdersCount}
+                    </motion.span>
+                  )}
                 </button>
               </li>
             ))}
           </ul>
 
-          <div className="p-3 md:p-4 border-t border-gray-700">
+          <div className="p-4 border-t border-green-400">
             <button
               onClick={handleLogout}
-              className="w-full bg-red-600 hover:bg-red-700 py-2 rounded transition font-medium text-sm md:text-base"
+              className="w-full bg-green-600 hover:bg-green-700 py-2 rounded text-white font-medium"
             >
               Logout
             </button>
           </div>
-        </div>
+        </aside>
 
-        {/* Mobile overlay */}
+        {/* Dark Overlay (Mobile Only) */}
         {mobileOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -139,19 +139,21 @@ const AdminDashboard = () => {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
-          <h1 className="text-3xl font-bold text-blue-700 mb-4">Welcome, Admin!</h1>
-          <p className="text-gray-600 mb-6">
+        <main className="flex-1 p-8">
+          {pendingOrdersCount === null ? (
+            <Shimmer width="w-1/3" height="h-8" className="mb-4" />
+          ) : (
+            <h1 className="text-3xl font-bold text-green-800 mb-4">Welcome, Admin!</h1>
+          )}
+
+          <p className="text-green-700 mb-6">
             Select a module from the sidebar to manage data.
           </p>
 
-          <div className="bg-white shadow rounded-xl p-6 h-full">
-            <p className="text-gray-400">
-              Here the selected module will render (Tables, Orders, Categories, etc.)
-            </p>
+          <div className="bg-green-50 shadow rounded-xl p-6 h-full">
             <Outlet />
           </div>
-        </div>
+        </main>
       </div>
     </>
   );

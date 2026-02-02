@@ -3,9 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navbar from '../../components/Navbar/Navbar';
 
 import Home from '../Home/Home';
-import About from '../About/About';
-import Features from '../Features/Features';
-import Contact from '../Contact/Contact';
 import FallbackRoute from './Fallback';
 import Register from '../../components/Register/Register';
 import VerifyOtp from '../../components/Register/VerifyOtp';
@@ -31,9 +28,6 @@ const Layout = () => {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/features" element={<Features />} />
-        <Route path="/contact" element={<Contact />} />
         <Route path="/send-otp" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/login" element={<Login />} />

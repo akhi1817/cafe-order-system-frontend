@@ -10,15 +10,18 @@ const AddProduct = ({ onSuccess }) => {
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [isVeg, setIsVeg] = useState(true);
-  const [displayOrder, setDisplayOrder] = useState(0);
+  const [displayOrder, setDisplayOrder] = useState("");
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.GET_ALL_CATEGORIES);
+        const res = await axios.get(API_ENDPOINTS.GET_ALL_CATEGORIES, {
+          withCredentials: true,
+        });
         setCategories(res.data.data);
       } catch {
         toast.error("Failed to load categories");
@@ -27,6 +30,7 @@ const AddProduct = ({ onSuccess }) => {
     fetchCategories();
   }, []);
 
+  // Upload Product Image
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -38,10 +42,11 @@ const AddProduct = ({ onSuccess }) => {
       setUploading(true);
       const res = await axios.post(API_ENDPOINTS.UPLOAD_PRODUCT_IMAGE, formData, {
         withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" },
       });
+
       setImage(res.data.imageUrl);
-      toast.success("Image uploaded successfully");
+      toast.success("Image uploaded successfully!");
     } catch {
       toast.error("Image upload failed");
     } finally {
@@ -49,189 +54,156 @@ const AddProduct = ({ onSuccess }) => {
     }
   };
 
+  // Create Product
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!name || !price || !category || !image) {
-      return toast.error("Fill all required fields");
+      return toast.error("Please fill all required fields");
     }
 
     try {
       setLoading(true);
-      await axios.post(
-        API_ENDPOINTS.CREATE_PRODUCT,
-        {
-          name,
-          price,
-          category,
-          isVeg,
-          displayOrder,
-          image,
-          isActive: true
-        },
-        { withCredentials: true }
-      );
 
-      toast.success("Product added successfully");
+      const payload = {
+        name,
+        price: Number(price),
+        category,
+        image,
+        isVeg,
+        displayOrder: Number(displayOrder) || 0,
+        isActive: true,
+      };
 
+      await axios.post(API_ENDPOINTS.CREATE_PRODUCT, payload, {
+        withCredentials: true,
+      });
+
+      toast.success("Product added successfully!");
+
+      // reset form
       setName("");
       setPrice("");
       setCategory("");
       setImage("");
-      setDisplayOrder(0);
       setIsVeg(true);
+      setDisplayOrder("");
 
-      onSuccess();
-    } catch {
-      toast.error("Failed to add product");
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add product");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center 
-      bg-linear-to-br from-[#FAF3E0] via-[#E8DCC4] to-[#F5EFE6] p-6">
-      
+    <div className="min-h-screen flex items-center justify-center p-6 bg-linear-to-br from-[#FAF9E0] via-[#F5F7D3] to-[#E8F1C0]">
+
       <motion.form
         onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 60, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-lg rounded-3xl 
-        bg-white/70 backdrop-blur-xl
-        border border-[#D2B48C]/50 shadow-2xl 
-        p-8 space-y-5"
+        initial={{ opacity: 0, y: 60 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-lg bg-white/70 backdrop-blur-xl border border-[#D2E089]/50 shadow-2xl p-8 rounded-3xl space-y-5"
       >
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-center"
-        >
-          <h2 className="text-2xl font-bold text-[#5C4033]">
-            🍽 Add Menu Item
-          </h2>
-          <p className="text-sm text-[#6B8E23] mt-1">
-            Warm & delicious food entry
-          </p>
-        </motion.div>
+        <h2 className="text-2xl font-bold text-[#5C4033] text-center">🍽 Add Menu Item</h2>
 
         {/* Name */}
-        <motion.div>
+        <div>
           <label className="text-sm text-[#5C4033]">Item Name</label>
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
             placeholder="Paneer Butter Masala"
-            className="mt-1 w-full rounded-xl px-4 py-2 bg-white
-            border border-[#D2B48C]/60 focus:outline-none
-            focus:ring-2 focus:ring-[#6B8E23]"
+            onChange={(e) => setName(e.target.value)}
+            className="mt-1 w-full rounded-xl px-4 py-2 bg-white border border-[#D2E089]/50 focus:ring-2 focus:ring-[#6B8E23]"
           />
-        </motion.div>
+        </div>
 
         {/* Price */}
-        <motion.div>
+        <div>
           <label className="text-sm text-[#5C4033]">Price (₹)</label>
           <input
             type="number"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
             placeholder="199"
-            className="mt-1 w-full rounded-xl px-4 py-2 bg-white
-            border border-[#D2B48C]/60 focus:outline-none
-            focus:ring-2 focus:ring-[#8FBC8F]"
+            onChange={(e) => setPrice(e.target.value)}
+            className="mt-1 w-full rounded-xl px-4 py-2 bg-white border border-[#D2E089]/50 focus:ring-2 focus:ring-[#6B8E23]"
           />
-        </motion.div>
+        </div>
 
         {/* Category */}
-        <motion.div>
+        <div>
           <label className="text-sm text-[#5C4033]">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full rounded-xl px-4 py-2 bg-white
-            border border-[#D2B48C]/60 focus:outline-none
-            focus:ring-2 focus:ring-[#6B8E23]"
+            className="mt-1 w-full rounded-xl px-4 py-2 bg-white border border-[#D2E089]/50 focus:ring-2 focus:ring-[#6B8E23]"
           >
-            <option value="">Select category</option>
+            <option value="">Select Category</option>
             {categories.map((cat) => (
               <option key={cat._id} value={cat._id}>
                 {cat.name}
               </option>
             ))}
           </select>
-        </motion.div>
+        </div>
 
         {/* Veg + Display Order */}
-   <motion.div className="flex items-center justify-between">
-  <label className="flex items-center gap-3 cursor-pointer select-none">
-    <div
-      onClick={() => setIsVeg(!isVeg)}
-      className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
-        isVeg ? "bg-green-600 justify-start" : "bg-red-500 justify-end"
-      } flex`}
-    >
-      <motion.div
-        layout
-        className="w-4 h-4 bg-white rounded-full shadow-md"
-      />
-    </div>
-    <span className="text-sm text-[#5C4033]">
-      {isVeg ? "Veg 🌱" : "Non-Veg 🍗"}
-    </span>
-  </label>
+        <div className="flex justify-between items-center">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <div
+              onClick={() => setIsVeg(!isVeg)}
+              className={`w-12 h-6 flex items-center rounded-full p-1 transition-all duration-300 ${
+                isVeg ? "bg-green-600 justify-start" : "bg-red-500 justify-end"
+              }`}
+            >
+              <motion.div layout className="w-4 h-4 bg-white rounded-full shadow" />
+            </div>
+            <span className="text-sm text-[#5C4033]">
+              {isVeg ? "Veg 🌱" : "Non-Veg 🍗"}
+            </span>
+          </label>
 
-  <input
-    type="number"
-    value={displayOrder}
-    onChange={(e) => setDisplayOrder(e.target.value)}
-    placeholder="Order"
-    className="w-24 rounded-xl px-3 py-2 bg-white
-      border border-[#D2B48C]/60 focus:outline-none
-      focus:ring-2 focus:ring-[#6B8E23]"
-  />
-</motion.div>
-
+          <input
+            type="number"
+            placeholder="Order"
+            value={displayOrder}
+            onChange={(e) => setDisplayOrder(e.target.value)}
+            className="w-24 px-3 py-2 rounded-xl bg-white border border-[#D2E089]/50 focus:ring-2 focus:ring-[#6B8E23]"
+          />
+        </div>
 
         {/* Image Upload */}
-        <motion.div layout>
+        <div>
           <label className="text-sm text-[#5C4033]">Item Image</label>
           <input
             type="file"
-            onChange={handleImageUpload}
             disabled={uploading}
-            className="mt-2 block w-full text-sm
-            file:mr-4 file:py-2 file:px-4 file:rounded-full
-            file:border-0 file:bg-linear-to-r
-            file:from-[#6B8E23] file:to-green-600
-            file:text-white"
+            onChange={handleImageUpload}
+            className="mt-2 block w-full text-sm file:bg-[#6B8E23] file:text-white file:px-4 file:py-2 file:rounded-full"
           />
 
           {image && (
             <motion.img
               src={image}
-              alt="Preview"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-3 w-32 h-32 object-cover
-              rounded-2xl shadow-lg border border-[#D2B48C]/50"
+              alt="preview"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-3 w-32 h-32 rounded-2xl object-cover border shadow"
             />
           )}
-        </motion.div>
+        </div>
 
-        {/* Submit */}
+        {/* Submit Button */}
         <motion.button
           type="submit"
           disabled={loading || uploading}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          className="w-full py-3 rounded-2xl text-white font-semibold
-          bg-linear-to-r from-[#6B8E23] via-green-600 to-emerald-600
-          shadow-lg"
+          whileTap={{ scale: 0.97 }}
+          className="w-full py-3 rounded-2xl text-white font-semibold bg-linear-to-r from-[#6B8E23] via-green-600 to-emerald-600 disabled:opacity-60"
         >
-          {loading ? "Adding..." : "🍽 Add Menu Item"}
+          {loading ? "Adding..." : "Add Menu Item 🍽"}
         </motion.button>
       </motion.form>
     </div>

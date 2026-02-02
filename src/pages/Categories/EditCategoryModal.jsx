@@ -1,135 +1,200 @@
-import { useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import API_ENDPOINTS from "../../config/api";
 
 const EditCategoryModal = ({ data, onClose, onSuccess }) => {
-  const [name, setName] = useState(data.name);
-  const [displayOrder, setDisplayOrder] = useState(data.displayOrder);
-  const [isActive, setIsActive] = useState(data.isActive);
+  const [form, setForm] = useState({
+    name: data.name,
+    displayOrder: data.displayOrder,
+    isActive: data.isActive,
+  });
+
   const [loading, setLoading] = useState(false);
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
+  const modalRef = useRef(null);
 
-    if (!name.trim()) {
-      toast.error("Category name is required");
-      return;
-    }
+  /* ------------------------------
+      Sync data when modal reopens
+  ------------------------------- */
+  useEffect(() => {
+    setForm({
+      name: data.name,
+      displayOrder: data.displayOrder,
+      isActive: data.isActive,
+    });
+  }, [data]);
 
-    try {
-      setLoading(true);
+  /* ------------------------------
+      Close on ESC
+  ------------------------------- */
+  useEffect(() => {
+    const closeOnEsc = (e) => e.key === "Escape" && !loading && onClose();
+    window.addEventListener("keydown", closeOnEsc);
+    return () => window.removeEventListener("keydown", closeOnEsc);
+  }, [loading, onClose]);
 
-      await axios.put(
-        API_ENDPOINTS.UPDATE_CATEGORY(data._id),
-        { name, displayOrder, isActive },
-        {
-          withCredentials: true // 🔐 admin only
-        }
-      );
-
-      toast.success("Category updated successfully");
-      onSuccess();
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Update failed"
-      );
-    } finally {
-      setLoading(false);
+  /* ------------------------------
+      Click Outside to Close
+  ------------------------------- */
+  const handleClickOutside = (e) => {
+    if (modalRef.current && !modalRef.current.contains(e.target) && !loading) {
+      onClose();
     }
   };
 
+  /* ------------------------------
+      Update Category
+  ------------------------------- */
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      if (!form.name.trim()) return toast.error("Category name is required");
+
+      try {
+        setLoading(true);
+
+        await axios.put(
+          API_ENDPOINTS.UPDATE_CATEGORY(data._id),
+          form,
+          { withCredentials: true }
+        );
+
+        toast.success("Category updated successfully");
+        onSuccess();
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Update failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [form, data._id, onSuccess]
+  );
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg">
-        {/* Header */}
-        <div className="px-6 py-4 border-b">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Edit Category
-          </h3>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleUpdate} className="px-6 py-5 space-y-5">
-          {/* Category Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Category Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={loading}
-              required
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-            />
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+        onMouseDown={handleClickOutside}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        {/* Modal */}
+        <motion.div
+          ref={modalRef}
+          onMouseDown={(e) => e.stopPropagation()}
+          initial={{ scale: 0.9, opacity: 0, y: 30 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 30 }}
+          transition={{ duration: 0.25 }}
+          className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden"
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Header */}
+          <div className="px-6 py-4 border-b bg-green-50">
+            <h3 className="text-lg font-semibold text-green-800">
+              Edit Category
+            </h3>
           </div>
 
-          {/* Display Order */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Display Order
-            </label>
-            <input
-              type="number"
-              value={displayOrder}
-              onChange={(e) => setDisplayOrder(e.target.value)}
-              disabled={loading}
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-            />
-          </div>
-
-          {/* Status Toggle */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              Status
-            </label>
-
-            <button
-              type="button"
-              onClick={() => setIsActive(!isActive)}
-              disabled={loading}
-              className={`w-full py-2 rounded-lg text-sm font-semibold transition
-                ${
-                  isActive
-                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                    : "bg-red-100 text-red-700 hover:bg-red-200"
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-green-700 mb-1">
+                Category Name
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, name: e.target.value }))
                 }
-              `}
-            >
-              {isActive ? "Active" : "Inactive"}
-            </button>
+                disabled={loading}
+                required
+                className="w-full px-4 py-2 border rounded-xl bg-white text-sm
+                  focus:ring-2 focus:ring-green-300 focus:outline-none disabled:bg-gray-100"
+              />
+            </div>
 
-            <p className="mt-1 text-xs text-gray-500">
-              {isActive
-                ? "Category is visible on customer screen"
-                : "Category is hidden from customer screen"}
-            </p>
-          </div>
+            {/* Display Order */}
+            <div>
+              <label className="block text-sm font-medium text-green-700 mb-1">
+                Display Order
+              </label>
+              <input
+                type="number"
+                value={form.displayOrder}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    displayOrder: Number(e.target.value),
+                  }))
+                }
+                disabled={loading}
+                className="w-full px-4 py-2 border rounded-xl bg-white text-sm
+                  focus:ring-2 focus:ring-green-300 focus:outline-none disabled:bg-gray-100"
+              />
+            </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="px-4 py-2 text-sm rounded-lg border text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
-            >
-              Cancel
-            </button>
+            {/* Status Toggle */}
+            <div>
+              <label className="block text-sm font-medium text-green-700 mb-2">
+                Status
+              </label>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() =>
+                  setForm((prev) => ({ ...prev, isActive: !prev.isActive }))
+                }
+                className={`w-full py-2 rounded-xl text-sm font-semibold transition
+                  ${
+                    form.isActive
+                      ? "bg-green-100 text-green-700 hover:bg-green-200"
+                      : "bg-red-100 text-red-700 hover:bg-red-200"
+                  }`}
+              >
+                {form.isActive ? "Active" : "Inactive"}
+              </button>
+
+              <p className="mt-1 text-xs text-gray-500">
+                {form.isActive
+                  ? "Category is visible to customers"
+                  : "Category is hidden from customer view"}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3 pt-3">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700
+                  hover:bg-gray-100 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 text-sm rounded-lg bg-green-600 text-white
+                  hover:bg-green-700 transition disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
