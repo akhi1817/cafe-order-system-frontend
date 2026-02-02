@@ -77,7 +77,7 @@ const AdminDashboard = () => {
         <span className="ml-4 font-bold text-lg">Admin Panel</span>
       </div>
 
-      <div className="mt-14 md:mt-0 flex min-h-screen bg-green-50">
+      <div className="mt-14 md:mt-0 flex">
         {/* Sidebar */}
         <aside
           className={`flex flex-col fixed md:static top-0 left-0 h-full z-50 w-48 md:w-64 transform transition-transform duration-300
