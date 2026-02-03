@@ -1,133 +1,213 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
-import { logoutSuccess } from "../../redux/authSlice";
-import Cookies from "js-cookie";
-import axios from "axios";
-import API_ENDPOINTS from "../../config/api";
-import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+    { name: "Services", path: "/services" },
+    { name: "Features", path: "/features" },
+    { name: "Contact", path: "/contact" },
+  ];
 
-  // Memoized nav items
-  const navItems = useMemo(
-    () => [
-      { name: "Home", path: "/" },
-    ],
-    []
-  );
-
-  const handleLogout = async () => {
-    try {
-      await axios.get(API_ENDPOINTS.LOGOUT_USER, { withCredentials: true });
-
-      Cookies.remove("token");
-      dispatch(logoutSuccess());
-      toast.success("Logged out successfully 👋");
-
-      navigate("/login");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Logout failed");
-    }
-  };
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="w-full bg-white shadow-md fixed top-0 left-0 z-50">
-      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-3">
+    <nav className="fixed top-4 left-0 w-full z-50">
+      {/* Full-width glass background */}
+  <div
+  className={`transition-all duration-300 ease-in-out
+    rounded-3xl shadow-lg
+    ${scrolled 
+      ? "w-[320px] md:w-[550px] bg-[rgba(15,60,45,0.35)] backdrop-blur-xl backdrop-saturate-150" 
+      : "w-[880px] md:w-[890px] bg-[rgba(15,60,45,0.35)] backdrop-blur-xl backdrop-saturate-150"
+    } mx-auto`}
+>
 
-        {/* Brand Name */}
+
+        {/* Inner content - shrinks on scroll */}
         <div
-          onClick={() => navigate("/")}
-          className="flex items-center gap-3 cursor-pointer"
+          className={`mx-auto flex items-center justify-between
+            transition-all duration-300 ease-in-out
+            ${scrolled ? "h-14 w-[320px] md:w-[400px] px-4" : "h-20 w-[880px] md:w-[880px] px-6"}`}
         >
-          <h1 className="text-3xl font-bold text-emerald-600">
-            Café<span className="text-slate-700"> Aurora</span>
-          </h1>
-        </div>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-8">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              className={({ isActive }) =>
-                isActive
-                  ? "text-emerald-600 font-semibold border-b-2 border-emerald-600 pb-1"
-                  : "text-slate-700 hover:text-emerald-600 transition"
-              }
+          {/* Logo */}
+          <div
+            onClick={() => navigate("/")}
+            className="cursor-pointer flex items-center gap-2"
+          >
+            <h1
+              className={`font-bold transition-all duration-300 ${
+                scrolled ? "text-lg" : "text-2xl"
+              } text-black-200`}
             >
-              {item.name}
-            </NavLink>
-          ))}
+                 Café Aurora
+            </h1>
+          </div>
 
-          {/* Logout Button Only if Logged In */}
-          {isLoggedIn && (
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-6 text-white/90">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) =>
+                  `relative font-medium transition ${
+                    isActive ? "text-[#4F46E5]" : "hover:text-[#4F46E5]"
+                  }`
+                }
+              >
+                <span className="relative group">
+                  {item.name}
+                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#4F46E5] transition-all group-hover:w-full"></span>
+                </span>
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Mobile Menu Icon */}
+          <div className="md:hidden">
+            {menuOpen ? (
+              <X
+                className="w-7 h-7 text-[#4F46E5]"
+                onClick={() => setMenuOpen(false)}
+              />
+            ) : (
+              <Menu
+                className="w-7 h-7 text-[#4F46E5]"
+                onClick={() => setMenuOpen(true)}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              key="mobile-menu"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden bg-[#4F46E5] backdrop-blur-xl border-t border-white/10 px-6 py-6 space-y-4 rounded-b-2xl"
             >
-              Logout
-            </button>
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  onClick={() => setMenuOpen(false)}
+                  className="block text-white/90 text-lg font-medium hover:text-[#4F46E5] transition"
+                >
+                  {item.name}
+                </NavLink>
+              ))}
+            </motion.div>
           )}
-        </div>
-
-        {/* Mobile Menu Icon */}
-        <div className="md:hidden flex items-center">
-          {menuOpen ? (
-            <X
-              className="w-7 h-7 text-emerald-600 cursor-pointer"
-              onClick={() => setMenuOpen(false)}
-            />
-          ) : (
-            <Menu
-              className="w-7 h-7 text-emerald-600 cursor-pointer"
-              onClick={() => setMenuOpen(true)}
-            />
-          )}
-        </div>
+        </AnimatePresence>
       </div>
-
-      {/* Mobile Menu Dropdown */}
-      {menuOpen && (
-        <div className="md:hidden bg-white shadow-md px-6 py-4 space-y-4 animate-fadeIn">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                isActive
-                  ? "block text-emerald-600 font-semibold"
-                  : "block text-slate-700 hover:text-emerald-600"
-              }
-            >
-              {item.name}
-            </NavLink>
-          ))}
-
-          {/* Logout Only (Login removed) */}
-          {/* {isLoggedIn && (
-            <button
-              onClick={() => {
-                handleLogout();
-                setMenuOpen(false);
-              }}
-              className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-medium"
-            >
-              Logout
-            </button>
-          )} */}
-        </div>
-      )}
     </nav>
   );
 };
 
 export default Navbar;
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

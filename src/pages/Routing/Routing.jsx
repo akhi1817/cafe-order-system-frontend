@@ -24,7 +24,7 @@ const Layout = () => {
   return (
     <>
       {/* ❌ Admin page par Navbar hide */}
-      {!isAdminRoute && <Navbar />}
+      {/* {!isAdminRoute && <Navbar />} */}
 
       <Routes>
         <Route path="/" element={<Home />} />

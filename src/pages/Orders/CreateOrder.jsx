@@ -150,7 +150,6 @@ const CreateOrder = ({ onSuccess }) => {
         onSubmit={handleSubmit}
         className="bg-white/30 backdrop-blur-xl mt-8 p-6 rounded-2xl shadow-xl border border-green-200"
       >
-        <h3 className="text-2xl font-bold text-green-900 mb-6">🧾 Create New Order</h3>
 
         {/* Order Type */}
         <div className="flex flex-col mb-4">
@@ -245,7 +244,7 @@ const CreateOrder = ({ onSuccess }) => {
           disabled={loading || (orderType === "Dine-in" && !table)}
           className="w-full py-3 rounded-xl font-semibold text-white bg-green-900 hover:bg-green-800 disabled:opacity-50"
         >
-          {loading ? "Creating..." : "Create Order"}
+          {loading ? "Taking..." : "Take my Order"}
         </motion.button>
 
         {/* EXTRA CSS */}
