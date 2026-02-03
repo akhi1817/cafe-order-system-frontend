@@ -1,5 +1,6 @@
 // src/components/order/CreateOrder.jsx
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -13,8 +14,11 @@ const CreateOrder = ({ onSuccess }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isLoadingUI, setIsLoadingUI] = useState(true);
+  
 
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   // SHIMMER SIMULATION
   useEffect(() => {
@@ -136,6 +140,16 @@ const CreateOrder = ({ onSuccess }) => {
       transition={{ duration: 0.35 }}
       className="max-w-2xl mx-auto"
     >
+  {/* Page Heading */}
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="text-center text-4xl sm:text-5xl font-extrabold text-green-900 tracking-wide drop-shadow-lg mt-10 mb-10"
+      >
+        Cafe Aurora 🍽️☕
+      </motion.h1>
+  
       {/* MENU SELECTOR MODAL */}
       {menuOpen && (
         <MenuSelector
@@ -145,6 +159,8 @@ const CreateOrder = ({ onSuccess }) => {
           onClose={() => setMenuOpen(false)}
         />
       )}
+     
+    
 
       <motion.form
         onSubmit={handleSubmit}
@@ -153,6 +169,17 @@ const CreateOrder = ({ onSuccess }) => {
 
         {/* Order Type */}
         <div className="flex flex-col mb-4">
+        <div className="flex justify-end mb-4">
+ <button
+  type="button"
+  onClick={() => navigate("/")}
+  className="w-10 h-10 bg-red-500 text-white rounded-full shadow hover:bg-red-600 flex items-center justify-center"
+>
+  ✖
+</button>
+
+</div>
+
           <label className="text-green-900 font-medium mb-1">Order Type</label>
           <select
             value={orderType}
@@ -184,19 +211,18 @@ const CreateOrder = ({ onSuccess }) => {
         )}
 
         {/* SEE MENU BUTTON */}
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            className="w-full py-2 rounded-xl font-semibold text-white bg-green-700 hover:bg-green-800"
-          >
-            🍔 See Menu
-          </button>
-        </div>
+        {/* 🍔 Menu Button */}
+  <button
+    type="button"
+    onClick={() => setMenuOpen(true)}
+    className="flex-1 px-5 py-3 rounded-xl font-semibold text-white bg-green-700 hover:bg-green-800"
+  >
+    🍔 Choose from Menu
+  </button>
 
         {/* Items List */}
         {items.length > 0 && (
-          <div className="bg-white/40 backdrop-blur-md rounded-xl p-4 border mb-6">
+          <div className="bg-white/40 backdrop-blur-md rounded-xl mt-5 p-4 border mb-6">
             <h4 className="font-semibold text-green-900 mb-2">Order Items</h4>
 
             {items.map((item, index) => (
@@ -238,14 +264,17 @@ const CreateOrder = ({ onSuccess }) => {
           </div>
         )}
 
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          type="submit"
-          disabled={loading || (orderType === "Dine-in" && !table)}
-          className="w-full py-3 rounded-xl font-semibold text-white bg-green-900 hover:bg-green-800 disabled:opacity-50"
-        >
-          {loading ? "Taking..." : "Take my Order"}
-        </motion.button>
+         {/* ✅ Submit Order */}
+  <motion.button
+    whileTap={{ scale: 0.97 }}
+    type="submit"
+    disabled={loading || (orderType === "Dine-in" && !table)}
+    className="flex-1 px-5 py-3 mx-2 rounded-xl font-semibold text-white bg-green-900 hover:bg-green-800 disabled:opacity-50"
+  >
+    {loading ? "Taking..." : "Take my Order"}
+  </motion.button>
+
+       
 
         {/* EXTRA CSS */}
         <style>{`

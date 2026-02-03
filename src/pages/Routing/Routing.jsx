@@ -14,6 +14,7 @@ import Product from '../Product/Product';
 import Table from '../Table/Table';
 import Order from '../Orders/Order';
 import CreateOrder from '../Orders/CreateOrder';
+import Menu from '../Product/Menu';
 
 const Layout = () => {
   const location = useLocation();
@@ -32,6 +33,7 @@ const Layout = () => {
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/login" element={<Login />} />
         <Route path='/create-order' element={<CreateOrder/>}/>
+        <Route path='/menu' element={<Menu/>}/>
 
         {/* ✅ Admin */}
           <Route path="/admin-dashboard" element={<AdminDashboard />}>
