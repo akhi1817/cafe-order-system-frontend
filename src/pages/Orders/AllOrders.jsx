@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import API_ENDPOINTS from "../../config/api";
 
 const AllOrders = ({ refresh, onUpdate }) => {
@@ -147,7 +148,19 @@ const handleDeleteOrder = async (orderId) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {currentOrders.map(order => (
-            <div key={order._id} className="bg-linear-to-b from-green-100 via-green-50 to-green-100 rounded-2xl shadow-xl p-5 hover:shadow-2xl transition border border-green-200">
+<motion.div
+  key={order._id}
+  className={`
+    rounded-2xl shadow-xl p-5 border transition 
+    bg-linear-to-b from-green-100 via-green-50 to-green-100
+${order.status !== "Cancelled" && order.paymentStatus !== "Paid"
+  ? "animate-pulse bg-orange-600"
+  : ""}
+
+
+  `}
+>
+
 
               {/* Header */}
               <div className="flex justify-between items-center mb-3">
@@ -246,7 +259,7 @@ const handleDeleteOrder = async (orderId) => {
 </div>
 
 
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

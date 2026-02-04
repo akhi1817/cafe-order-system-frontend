@@ -74,49 +74,83 @@ const CreateOrder = ({ onSuccess }) => {
     });
   };
 
+// Save FULL backend order to localStorage
+const saveUserOrder = (backendOrder) => {
+  const existing = JSON.parse(localStorage.getItem("userOrders") || "[]");
+
+  const newOrder = {
+    // use EXACT backend data
+    orderId: backendOrder._id,
+    orderType: backendOrder.orderType,
+    table: backendOrder.table,
+    items: backendOrder.items,
+    status: backendOrder.status,
+    paymentStatus: backendOrder.paymentStatus,
+    totalAmount: backendOrder.totalAmount,
+    createdAt: backendOrder.createdAt,
+
+    // expireAt handle hoga user orders component me
+    expireAt: null
+  };
+
+  localStorage.setItem("userOrders", JSON.stringify([...existing, newOrder]));
+};
+
+
+
+
   // -------------------------
   // Submit Order
   // -------------------------
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (loading) return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (loading) return;
 
-    if (orderType === "Dine-in" && !table)
-      return toast.error("Please select a table");
-    if (items.length === 0)
-      return toast.error("Please select at least one product");
-    if (items.some((i) => i.quantity < 1))
-      return toast.error("Invalid quantity");
+  if (orderType === "Dine-in" && !table)
+    return toast.error("Please select a table");
+  if (items.length === 0)
+    return toast.error("Please select at least one product");
+  if (items.some((i) => i.quantity < 1))
+    return toast.error("Invalid quantity");
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const backendItems = items.map((i) => ({
-        product: i.product,
-        quantity: i.quantity,
-      }));
+  try {
+    const backendItems = items.map((i) => ({
+      product: i.product,
+      quantity: i.quantity,
+    }));
 
-      await axios.post(
-        API_ENDPOINTS.CREATE_ORDER,
-        {
-          orderType,
-          table: orderType === "Dine-in" ? table : null,
-          items: backendItems,
-        },
-        { withCredentials: true }
-      );
+    // ✅ FIX: store axios result
+    const response = await axios.post(
+      API_ENDPOINTS.CREATE_ORDER,
+      {
+        orderType,
+        table: orderType === "Dine-in" ? table : null,
+        items: backendItems,
+      },
+      { withCredentials: true }
+    );
 
-      toast.success("Order created successfully");
-      setItems([]);
-      setTable("");
-      onSuccess?.();
-      fetchTables();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create order");
-    } finally {
-      setLoading(false);
-    }
-  };
+       // full backend order
+    const backendOrder = response.data.data;
+
+    // SAVE FULL BACKEND ORDER TO LOCALSTORAGE
+    saveUserOrder(backendOrder);
+
+    toast.success("Order created successfully");
+    setItems([]);
+    setTable("");
+    onSuccess?.();
+    fetchTables();
+
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Failed to create order");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // -------------------------
   // SHIMMER
@@ -269,7 +303,7 @@ const CreateOrder = ({ onSuccess }) => {
     whileTap={{ scale: 0.97 }}
     type="submit"
     disabled={loading || (orderType === "Dine-in" && !table)}
-    className="flex-1 px-5 py-3 mx-2 rounded-xl font-semibold text-white bg-green-900 hover:bg-green-800 disabled:opacity-50"
+    className="flex-1 px-5 py-3 mx-2 my-3 rounded-xl font-semibold text-white bg-green-900 hover:bg-green-800 disabled:opacity-50"
   >
     {loading ? "Taking..." : "Take my Order"}
   </motion.button>
