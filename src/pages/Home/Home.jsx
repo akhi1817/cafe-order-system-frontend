@@ -37,6 +37,14 @@ const Home = () => {
         >
           🧾 See Your Order
         </motion.button>
+         <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate("/login")}
+          className="px-6 py-3 ms-5 rounded-2xl bg-green-700 text-white font-semibold shadow-lg hover:bg-green-800 transition"
+        >
+          Admin Login
+        </motion.button>
       </div>
 
       {/* MENU */}
