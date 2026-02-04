@@ -56,7 +56,7 @@ const Login = () => {
           <motion.button whileHover={{ scale: loading ? 1 : 1.03 }} whileTap={{ scale: loading ? 1 : 0.97 }} type="submit" disabled={loading} className={`w-1/2 h-12 text-white rounded-xl font-semibold shadow-md transition-all bg-linear-to-r from-green-600 to-yellow-500 ${loading && "opacity-50 cursor-not-allowed"}`}>{loading ? "Logging in..." : "Login"}</motion.button>
         </form>
 
-        <p className="text-sm text-center text-gray-700 mt-4">Don’t have an account? <Link to="/send-otp" className="text-green-700 font-medium hover:underline">Register</Link></p>
+        {/* <p className="text-sm text-center text-gray-700 mt-4">Don’t have an account? <Link to="/send-otp" className="text-green-700 font-medium hover:underline">Register</Link></p> */}
       </motion.div>
     </div>
   );
