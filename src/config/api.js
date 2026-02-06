@@ -9,7 +9,11 @@ const API_ENDPOINTS = {
   SEND_OTP: `${baseurl}/api/auth/register/send-otp`,
   VERIFY_OTP: `${baseurl}/api/auth/register/verify-otp`,
   SEND_MESSAGE: `${baseurl}/api/auth/send-message`,
-
+  GET_ALL_USERS: `${baseurl}/api/auth/admin/users`,
+  UPDATE_USER_ROLE: (userId) => `${baseurl}/api/auth/admin/update-role/${userId}`,
+  SEND_ROLE_CHANGE_OTP: `${baseurl}/api/auth/admin/send-role-change-otp`,
+  VERIFY_ROLE_CHANGE_OTP: `${baseurl}/api/auth/admin/verify-role-change-otp`,
+  DELETE_USER: (userId) => `${baseurl}/api/auth/admin/delete/${userId}`,
 
   //category
   CREATE_CATEGORY: `${baseurl}/api/category`,

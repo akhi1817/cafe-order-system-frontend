@@ -16,6 +16,7 @@ import Order from '../Orders/Order';
 import CreateOrder from '../Orders/CreateOrder';
 import Menu from '../Product/Menu';
 import UserOrders from '../Orders/UserOrders';
+import Users from '../Users/Users';
 
 const Layout = () => {
   const location = useLocation();
@@ -43,6 +44,7 @@ const Layout = () => {
               <Route path='products' element={<Product/>}/>
               <Route path='tables' element={<Table/>}/>
               <Route path='orders' element={<Order/>}/>
+              <Route path='users' element={<Users/>}/>
           </Route>
 
         <Route path="*" element={<FallbackRoute />} />

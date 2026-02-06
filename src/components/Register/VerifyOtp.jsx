@@ -22,7 +22,6 @@ const Shimmer = () => {
 const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState("user");
   const location = useLocation();
   const navigate = useNavigate();
   const userData = location.state;
@@ -39,7 +38,7 @@ const VerifyOtp = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(API_ENDPOINTS.VERIFY_OTP, { ...userData, otp, role });
+      const res = await axios.post(API_ENDPOINTS.VERIFY_OTP, { ...userData, otp});
       toast.success(res.data.message);
       navigate("/login");
     } catch (err) {
@@ -55,11 +54,11 @@ const VerifyOtp = () => {
         <h2 className="text-3xl font-bold text-center text-green-700 mb-6">Verify Your OTP </h2>
 
         <form onSubmit={handleVerify} className="space-y-5 flex flex-col items-center">
-          <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full border border-green-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+          {/* <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full border border-green-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
             <option value="user">User</option>
             <option value="admin">Admin</option>
             <option value="staff">Staff</option>
-          </select>
+          </select> */}
 
           {loading ? <Shimmer /> : <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} required className="w-full border border-green-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 text-center tracking-widest text-lg bg-white/70" />}
 

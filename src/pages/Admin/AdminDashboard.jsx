@@ -20,6 +20,7 @@ const Shimmer = ({ width = "w-full", height = "h-6", rounded = "rounded-xl", cla
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+const userRole = localStorage.getItem("role");
 
   const [pendingOrdersCount, setPendingOrdersCount] = useState(null);
 
@@ -30,6 +31,8 @@ const AdminDashboard = () => {
       { title: "Categories", route: "/admin-dashboard/categories" },
       { title: "Products", route: "/admin-dashboard/products" },
       { title: "Orders", route: "/admin-dashboard/orders" },
+      { title: "Users", route: "/admin-dashboard/users" }
+
     ],
     []
   );
