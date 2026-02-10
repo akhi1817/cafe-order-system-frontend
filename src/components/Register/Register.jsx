@@ -33,8 +33,7 @@ const handleSendOtp = async (e) => {
 
   try {
     const res = await axios.post(
-        "https://cafe-order-system-backend.vercel.app/api/auth/send-otp",
-      formData
+  "https://cafe-order-system-backend.vercel.app/api/auth/register/send-otp",      formData
     );
 
     toast.success(res.data.message); // Success
