@@ -33,7 +33,7 @@ const handleSendOtp = async (e) => {
 
   try {
     const res = await axios.post(
-      "https://cafe-order-system-backend.vercel.app/api/send-otp",
+        "https://cafe-order-system-backend.vercel.app/api/auth/send-otp",
       formData
     );
 
