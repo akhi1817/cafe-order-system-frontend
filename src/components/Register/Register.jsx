@@ -26,19 +26,28 @@ const Register = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await axios.post(API_ENDPOINTS.SEND_OTP, formData);
-      toast.success(res.data.message);
-      navigate("/verify-otp", { state: res.data.data });
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Error sending OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Form submit function
+const handleSendOtp = async (e) => {
+  e.preventDefault(); // prevent page reload
+  setLoading(true);
+
+  try {
+    const res = await axios.post(
+      "https://cafe-order-system-backend.vercel.app/api/send-otp",
+      formData
+    );
+
+    toast.success(res.data.message); // Success
+  } catch (error) {
+    console.error(error);
+    toast.error(
+      error.response?.data?.message || "Failed to send OTP. Try again!"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-green-100 via-green-200 to-yellow-100 p-6">
