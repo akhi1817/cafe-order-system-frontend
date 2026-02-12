@@ -45,12 +45,13 @@ const Login = () => {
       }
 
       dispatch(loginSuccess(user));
-      Cookies.set("token", res.data.token, { expires: 1 });
+Cookies.set("token", res.data.token, { expires: 1 });
       toast.success(res.data.message);
 
       // Navigate based on role
       if (user.role === "admin") navigate("/admin-dashboard");
       else if (user.role === "manager") navigate("/admin-dashboard");
+      else if (user.role === "staff") navigate("/admin-dashboard");
       else navigate("/");
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");

@@ -60,6 +60,10 @@ TOGGLE_TABLE_STATUS: (id) => `${baseurl}/api/table/${id}/toggle-status`, // PATC
   //delete one order
   DELETE_ORDER: (id) => `${baseurl}/api/orders/delete-order/${id}`,
 
+  // ✏️ Edit existing order items
+EDIT_ORDER_ITEMS: (id) => `${baseurl}/api/orders/${id}/edit-items`, // PATCH
+
+
   // 🟣 Reports (History)
   GET_ORDER_REPORTS: `${baseurl}/api/orders/reports`,
 };

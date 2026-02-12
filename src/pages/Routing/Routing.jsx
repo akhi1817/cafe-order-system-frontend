@@ -34,7 +34,6 @@ const Layout = () => {
         <Route path="/send-otp" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/login" element={<Login />} />
-        <Route path='/create-order' element={<CreateOrder/>}/>
         <Route path='/menu' element={<Menu/>}/>
         <Route path='/user-order' element={<UserOrders/>}/>
 
@@ -45,6 +44,7 @@ const Layout = () => {
               <Route path='tables' element={<Table/>}/>
               <Route path='orders' element={<Order/>}/>
               <Route path='users' element={<Users/>}/>
+              <Route path='create-order' element={<CreateOrder/>}/>
           </Route>
 
         <Route path="*" element={<FallbackRoute />} />

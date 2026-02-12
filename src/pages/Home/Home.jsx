@@ -20,7 +20,7 @@ const Home = () => {
       </motion.h1>
 
       {/* Order Button */}
-      <div className="flex justify-center mt-4 mb-8">
+      {/* <div className="flex justify-center mt-4 mb-8">
         <motion.button
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
@@ -45,7 +45,7 @@ const Home = () => {
         >
           Admin Login
         </motion.button>
-      </div>
+      </div> */}
 
       {/* MENU */}
       <div className="mt-12">

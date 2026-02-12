@@ -204,13 +204,13 @@ const handleSubmit = async (e) => {
         {/* Order Type */}
         <div className="flex flex-col mb-4">
         <div className="flex justify-end mb-4">
- <button
+ {/* <button
   type="button"
   onClick={() => navigate("/")}
   className="w-10 h-10 bg-red-500 text-white rounded-full shadow hover:bg-red-600 flex items-center justify-center"
 >
   ✖
-</button>
+</button> */}
 
 </div>
 

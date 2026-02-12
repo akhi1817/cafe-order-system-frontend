@@ -4,6 +4,7 @@ import API_ENDPOINTS from "../../config/api";
 import { toast } from "sonner";
 import { Outlet, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import {useSelector} from 'react-redux';
 
 // 🌟 Shimmer Component (Fixed tailwind dynamic class issues)
 const Shimmer = ({ width = "w-full", height = "h-6", rounded = "rounded-xl", className = "" }) => (
@@ -20,22 +21,26 @@ const Shimmer = ({ width = "w-full", height = "h-6", rounded = "rounded-xl", cla
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-const userRole = localStorage.getItem("role");
-
+  const userRole = useSelector(state => state.auth.user?.role);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(null);
 
   // Sidebar Items (memoized for no rerenders)
-  const sidebarItems = useMemo(
-    () => [
-      { title: "Tables", route: "/admin-dashboard/tables" },
-      { title: "Categories", route: "/admin-dashboard/categories" },
-      { title: "Products", route: "/admin-dashboard/products" },
-      { title: "Orders", route: "/admin-dashboard/orders" },
-      { title: "Users", route: "/admin-dashboard/users" }
+const allSidebarItems = useMemo(
+  () => [
+    { title: "Tables", route: "/admin-dashboard/tables", roles: ["admin", "manager"] },
+    { title: "Categories", route: "/admin-dashboard/categories", roles: ["admin", "manager"] },
+    { title: "Products", route: "/admin-dashboard/products", roles: ["admin", "manager"] },
+    { title: "Orders", route: "/admin-dashboard/orders", roles: ["admin", "manager"] },
+    { title: "Users", route: "/admin-dashboard/users", roles: ["admin", "manager"] },
+    { title: "Create Orders", route: "/admin-dashboard/create-order", roles: ["admin", "manager", "staff"] },
+  ],
+  []
+);
+const sidebarItems = useMemo(
+  () => allSidebarItems.filter(item => item.roles.includes(userRole)),
+  [userRole, allSidebarItems]
+);
 
-    ],
-    []
-  );
 
   // Logout Handler
   const handleLogout = async () => {
