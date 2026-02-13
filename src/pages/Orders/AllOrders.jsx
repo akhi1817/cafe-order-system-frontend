@@ -3,12 +3,18 @@ import axios from "axios";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import API_ENDPOINTS from "../../config/api";
+import { useNavigate } from "react-router-dom";
+import EditOrder from "./EditOrder";
 
 const AllOrders = ({ refresh, onUpdate }) => {
   const [orders, setOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const ordersPerPage = 20;
 
+const [editingOrder, setEditingOrder] = useState(null);
+
+
+  const ordersPerPage = 20;
+  const navigate=useNavigate();
   const formatOrderTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-IN", {
@@ -249,6 +255,18 @@ ${order.status !== "Cancelled" && order.paymentStatus !== "Paid"
         </button>
       )}
 
+
+  {/*Edit Order Button  */}
+<button
+  onClick={() => setEditingOrder(order)}
+  className="px-3 py-1 bg-blue-500 rounded-md text-sm font-semibold text-white"
+>
+  Edit
+</button>
+
+
+
+
   {/* ✅ Delete button (always visible) */}
   <button
     onClick={() => handleDeleteOrder(order._id)}
@@ -272,6 +290,20 @@ ${order.status !== "Cancelled" && order.paymentStatus !== "Paid"
           <button onClick={goToNext} disabled={currentPage===totalPages} className="px-3 py-1 rounded bg-green-200 text-green-900 disabled:opacity-50">Next</button>
         </div>
       )}
+
+{editingOrder && (
+  <EditOrder
+    orderId={editingOrder._id}
+    onClose={() => setEditingOrder(null)}
+    onUpdated={() => {
+      fetchOrders();
+      onUpdate?.();
+    }}
+  />
+)}
+
+
+
 
     </div>
   );

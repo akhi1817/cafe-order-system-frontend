@@ -40,10 +40,15 @@ TOGGLE_TABLE_STATUS: (id) => `${baseurl}/api/table/${id}/toggle-status`, // PATC
 
 
   // ---------- Orders ----------
-  // 🔐 Admin
-  GET_ALL_ORDERS: `${baseurl}/api/orders`,               // GET - Admin
+ 
+  GET_ALL_ORDERS: `${baseurl}/api/orders`,  
+  GET_ORDER_BY_ID: (id) => `${baseurl}/api/orders/${id}`,
+  
   UPDATE_ORDER_STATUS: (id) =>
     `${baseurl}/api/orders/${id}/status`,               // PATCH - Admin
+
+
+  UPDATE_ORDER: (id) => `${baseurl}/api/orders/${id}`,
 
   // 🧾 Order (Customer / Admin)
   CREATE_ORDER: `${baseurl}/api/orders`,                 // POST

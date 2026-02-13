@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 const initialState = {
   isLoggedIn: !!Cookies.get("token"), // check cookie initially
-  user: null,
+  user: JSON.parse(localStorage.getItem("user")) || null, // fallback to localStorage
 };
 
 export const authSlice = createSlice({
@@ -13,10 +13,16 @@ export const authSlice = createSlice({
     loginSuccess: (state, action) => {
       state.isLoggedIn = true;
       state.user = action.payload;
+
+      // ✅ Save to localStorage for refresh persistence
+      localStorage.setItem("user", JSON.stringify(action.payload));
     },
     logoutSuccess: (state) => {
       state.isLoggedIn = false;
       state.user = null;
+
+      // ✅ Clear localStorage on logout
+      localStorage.removeItem("user");
     },
   },
 });
