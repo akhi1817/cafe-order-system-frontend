@@ -35,9 +35,9 @@ const AdminDashboard = () => {
       { title: "Categories", route: "/admin-dashboard/categories", roles: ["admin", "manager"] },
       { title: "Products", route: "/admin-dashboard/products", roles: ["admin", "manager"] },
       { title: "Orders", route: "/admin-dashboard/orders", roles: ["admin", "manager"] },
-      { title: "Users", route: "/admin-dashboard/users", roles: ["admin", "manager"] },
       { title: "Create Orders", route: "/admin-dashboard/create-order", roles: ["admin", "manager", "staff"] },
       { title: "All Orders", route: "/admin-dashboard/all-orders", roles: ["admin", "manager", "staff"] },
+      { title: "Users", route: "/admin-dashboard/users", roles: ["admin", "manager"] },
       { title: "Reports", route: "/admin-dashboard/reports", roles: ["admin"] },
 
     ],
@@ -116,19 +116,20 @@ const AdminDashboard = () => {
                   {pendingOrdersCount === null ? <Shimmer width="w-2/3" height="h-5" /> : <span>{item.title}</span>}
 
                   {/* Pending Orders Badge */}
-                  {item.title === "Orders" && (
-                    <motion.span
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                      className={`text-xs px-2 py-0.5 rounded-full font-semibold 
-                        ${pendingOrdersCount === null
-                          ? "bg-[#FFF3E0] text-[#D9A066] animate-pulse"
-                          : "bg-[#6F4E37] text-[#FFF5E1]"
-                        }`}
-                    >
-                      {pendingOrdersCount === null ? "" : pendingOrdersCount}
-                    </motion.span>
-                  )}
+               {(item.title === "Orders" || item.title === "All Orders") && (
+  <motion.span
+    animate={{ scale: [1, 1.2, 1] }}
+    transition={{ duration: 1, repeat: Infinity }}
+    className={`text-xs px-2 py-0.5 rounded-full font-semibold 
+      ${pendingOrdersCount === null
+        ? "bg-[#FFF3E0] text-[#D9A066] animate-pulse"
+        : "bg-[#6F4E37] text-[#FFF5E1]"
+      }`}
+  >
+    {pendingOrdersCount === null ? "" : pendingOrdersCount}
+  </motion.span>
+)}
+
                 </button>
               </li>
             ))}

@@ -132,7 +132,7 @@ const handleDeleteOrder = async (orderId) => {
     <div className="p-4">
 
       {/* Dashboard Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
         {Object.entries(stats).map(([key, value]) => (
           <div key={key} className="bg-linear-to-r from-green-100 via-green-50 to-green-100 p-4 rounded-2xl shadow-lg hover:shadow-2xl transition text-center">
             <div className="text-green-800 text-sm">{key}</div>
@@ -153,7 +153,7 @@ const handleDeleteOrder = async (orderId) => {
       {currentOrders.length === 0 ? (
         <p className="text-gray-500 text-center">No orders found</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {currentOrders.map(order => (
 <motion.div
   key={order._id}

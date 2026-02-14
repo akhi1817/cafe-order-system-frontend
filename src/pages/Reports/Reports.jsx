@@ -179,7 +179,7 @@ export default function Reports({ refresh }) {
 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
   {/* Product-wise Bar Chart */}
-  <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 max-h-[600px] overflow-y-auto">
+  <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 max-h-[400px] overflow-y-auto">
     <h3 className="text-green-900 font-semibold mb-3 text-center text-lg md:text-xl tracking-wide">
       Product-wise Sales
     </h3>
@@ -191,7 +191,7 @@ export default function Reports({ refresh }) {
             label: "Units Sold",
             data: productData,
             backgroundColor: "rgba(67,160,71,0.8)",
-            borderRadius: 5,
+            borderRadius: 6,
           },
         ],
       }}
