@@ -57,20 +57,20 @@ const AddCategory = ({ onSuccess }) => {
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="bg-white/70 backdrop-blur-xl border border-green-200 rounded-3xl shadow-2xl p-8 space-y-6"
+        className="bg-[#FFF5E1]/70 backdrop-blur-xl border border-[#D9A066] rounded-3xl shadow-2xl p-8 space-y-6"
       >
         <motion.h3
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-2xl font-bold text-green-800 text-center"
+          className="text-2xl font-bold text-[#6F4E37] text-center"
         >
           🗂 Add Category
         </motion.h3>
 
         {/* Category Name */}
         <div>
-          <label className="block text-sm font-medium text-green-800 mb-1">
+          <label className="block text-sm font-medium text-[#6F4E37] mb-1">
             Category Name
           </label>
           <input
@@ -79,15 +79,15 @@ const AddCategory = ({ onSuccess }) => {
             value={form.name}
             onChange={(e) => updateField("name", e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-2 rounded-xl bg-white border border-green-300
-              focus:outline-none focus:ring-2 focus:ring-yellow-300 disabled:bg-gray-100"
+            className="w-full px-4 py-2 rounded-xl bg-[#FFF5E1] border border-[#D9A066]
+              focus:outline-none focus:ring-2 focus:ring-[#FFA726] disabled:bg-gray-100"
             required
           />
         </div>
 
         {/* Display Order */}
         <div>
-          <label className="block text-sm font-medium text-green-800 mb-1">
+          <label className="block text-sm font-medium text-[#6F4E37] mb-1">
             Display Order
           </label>
           <input
@@ -99,8 +99,8 @@ const AddCategory = ({ onSuccess }) => {
               updateField("displayOrder", Math.max(0, Number(e.target.value)))
             }
             disabled={loading}
-            className="w-full px-4 py-2 rounded-xl bg-white border border-green-300
-              focus:outline-none focus:ring-2 focus:ring-yellow-300 disabled:bg-gray-100"
+            className="w-full px-4 py-2 rounded-xl bg-[#FFF5E1] border border-[#D9A066]
+              focus:outline-none focus:ring-2 focus:ring-[#FFA726] disabled:bg-gray-100"
           />
         </div>
 
@@ -111,7 +111,7 @@ const AddCategory = ({ onSuccess }) => {
           whileHover={{ scale: loading ? 1 : 1.03 }}
           whileTap={{ scale: loading ? 1 : 0.95 }}
           className="w-full py-3 rounded-2xl text-white font-semibold
-            bg-green-500 hover:bg-green-600
+            bg-[#6F4E37] hover:bg-[#5A3E2D]
             shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? "Adding..." : "🍽 Add Category"}

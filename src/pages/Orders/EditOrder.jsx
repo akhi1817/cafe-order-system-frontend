@@ -184,7 +184,7 @@ const updateOrder = async () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-green-900">
-            ✏ Edit Order #{orderId}
+            ✏ Edit Order
           </h2>
           <button
             onClick={onClose}

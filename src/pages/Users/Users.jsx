@@ -14,9 +14,8 @@ const Users = () => {
   const [otp, setOtp] = useState("");
   const [otpSentEmail, setOtpSentEmail] = useState("");
 
-  const [superAdminId, setSuperAdminId] = useState(""); // super admin id
+  const [superAdminId, setSuperAdminId] = useState("");
 
-  // ---------------- Fetch all users ----------------
   const fetchUsers = async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.GET_ALL_USERS, {
@@ -25,8 +24,9 @@ const Users = () => {
       const data = res.data.data || [];
       setUsers(data);
 
-      // find first admin → super admin
-      const firstAdmin = data.filter(u => u.role === "admin").sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
+      const firstAdmin = data
+        .filter((u) => u.role === "admin")
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
       setSuperAdminId(firstAdmin?._id || "");
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -40,7 +40,6 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  // ---------------- Handle role change ----------------
   const handleRoleChange = async (user, role) => {
     if (user.role === role) return;
 
@@ -81,7 +80,6 @@ const Users = () => {
     }
   };
 
-  // ---------------- Verify OTP ----------------
   const handleVerifyOtp = async () => {
     if (!otp || !selectedUser || !newRole) return;
     try {
@@ -102,9 +100,9 @@ const Users = () => {
     }
   };
 
-  // ---------------- Delete user (Super Admin only) ----------------
   const handleDeleteUser = async (user) => {
-    if (!window.confirm(`Are you sure you want to delete "${user.username}"?`)) return;
+    if (!window.confirm(`Are you sure you want to delete "${user.username}"?`))
+      return;
 
     if (user._id === superAdminId) {
       toast.error("Super Admin cannot delete themselves");
@@ -112,10 +110,9 @@ const Users = () => {
     }
 
     try {
-      const res = await axios.delete(
-        API_ENDPOINTS.DELETE_USER(user._id),
-        { withCredentials: true }
-      );
+      const res = await axios.delete(API_ENDPOINTS.DELETE_USER(user._id), {
+        withCredentials: true,
+      });
       toast.success(res.data.message || "User deleted successfully");
       fetchUsers();
     } catch (err) {
@@ -125,34 +122,35 @@ const Users = () => {
   };
 
   return (
-    <div className="overflow-x-auto p-4">
-      <h2 className="text-2xl font-bold text-green-800 mb-4">
-        Registered Users
-      </h2>
+    <div className="overflow-x-auto p-4 bg-[#f7f1e7] min-h-screen">
+      <h2 className="text-2xl font-bold text-[#6b4226] mb-4">Registered Users</h2>
 
       {loading ? (
         <div className="space-y-2">
-          <div className="h-6 w-1/3 bg-green-100 rounded animate-pulse" />
-          <div className="h-6 w-full bg-green-100 rounded animate-pulse" />
-          <div className="h-6 w-full bg-green-100 rounded animate-pulse" />
+          <div className="h-6 w-1/3 bg-[#d7bfa8] rounded animate-pulse" />
+          <div className="h-6 w-full bg-[#d7bfa8] rounded animate-pulse" />
+          <div className="h-6 w-full bg-[#d7bfa8] rounded animate-pulse" />
         </div>
       ) : (
-        <table className="min-w-full bg-green-50 border rounded-xl overflow-hidden">
-          <thead className="bg-green-200">
+        <table className="min-w-full bg-[#f3e8dc] border border-[#cbb79b] rounded-xl overflow-hidden shadow">
+          <thead className="bg-[#e0cda9]">
             <tr>
-              <th className="px-4 py-2 text-left text-green-900">#</th>
-              <th className="px-4 py-2 text-left text-green-900">Username</th>
-              <th className="px-4 py-2 text-left text-green-900">Email</th>
-              <th className="px-4 py-2 text-left text-green-900">Role</th>
-              <th className="px-4 py-2 text-left text-green-900">Created At</th>
-              <th className="px-4 py-2 text-left text-green-900">Actions</th>
+              <th className="px-4 py-2 text-left text-[#6b4226]">#</th>
+              <th className="px-4 py-2 text-left text-[#6b4226]">Username</th>
+              <th className="px-4 py-2 text-left text-[#6b4226]">Email</th>
+              <th className="px-4 py-2 text-left text-[#6b4226]">Role</th>
+              <th className="px-4 py-2 text-left text-[#6b4226]">Created At</th>
+              <th className="px-4 py-2 text-left text-[#6b4226]">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-2 text-center text-green-700">
+                <td
+                  colSpan={6}
+                  className="px-4 py-2 text-center text-[#8b5e3c]"
+                >
                   No users found
                 </td>
               </tr>
@@ -160,37 +158,43 @@ const Users = () => {
               users.map((user, idx) => (
                 <tr
                   key={user._id}
-                  className="border-b border-green-200 hover:bg-green-100 transition"
+                  className="border-b border-[#cbb79b] hover:bg-[#f0e0d6] transition"
                 >
                   <td className="px-4 py-2">{idx + 1}</td>
                   <td className="px-4 py-2">{user.username}</td>
                   <td className="px-4 py-2">{user.email}</td>
-                 <td className="px-4 py-2 capitalize">
-  {superAdminId === user._id ? (
-    <span className="text-gray-400">Super Admin</span> // Super Admin ka role fixed
-  ) : (
-    <select
-      value={user.role}
-      onChange={(e) => handleRoleChange(user, e.target.value)}
-      className="border rounded px-2 py-1 text-green-900"
-    >
-      <option value="staff">Staff</option>
-      <option value="manager">Manager</option>
-      <option value="admin">Admin</option>
-      <option value="user">User</option>
-    </select>
-  )}
-</td>
+                  <td className="px-4 py-2 capitalize">
+                    {superAdminId === user._id ? (
+                      <span className="text-gray-500 font-semibold">
+                        Super Admin
+                      </span>
+                    ) : (
+                      <select
+                        value={user.role}
+                        onChange={(e) =>
+                          handleRoleChange(user, e.target.value)
+                        }
+                        className="border border-[#cbb79b] rounded px-2 py-1 text-[#6b4226] bg-[#f7f1e7]"
+                      >
+                        <option value="staff">Staff</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                      </select>
+                    )}
+                  </td>
                   <td className="px-4 py-2">
                     {new Date(user.createdAt).toLocaleString()}
                   </td>
                   <td className="px-4 py-2">
                     {superAdminId === user._id ? (
-                      <span className="text-gray-400">Super Admin</span>
+                      <span className="text-gray-500 font-semibold">
+                        Super Admin
+                      </span>
                     ) : (
                       <button
                         onClick={() => handleDeleteUser(user)}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                        className="px-3 py-1 bg-[#a0522d] text-white rounded hover:bg-[#8b3f1b] transition"
                       >
                         Delete
                       </button>
@@ -203,32 +207,31 @@ const Users = () => {
         </table>
       )}
 
-      {/* ---------------- OTP Modal ---------------- */}
       <AnimatePresence>
         {showOtpModal && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50"
           >
             <motion.div
               initial={{ y: -50 }}
               animate={{ y: 0 }}
               exit={{ y: -50 }}
-              className="bg-white rounded-lg p-6 w-96 shadow-lg"
+              className="bg-[#f7f1e7] rounded-lg p-6 w-96 shadow-lg"
             >
-              <h3 className="text-xl font-bold mb-4 text-green-800">
+              <h3 className="text-xl font-bold mb-4 text-[#6b4226]">
                 Enter OTP
               </h3>
-              <p className="mb-2 text-green-700">
+              <p className="mb-2 text-[#8b5e3c]">
                 OTP sent to: <b>{otpSentEmail}</b>
               </p>
               <input
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="border px-3 py-2 rounded w-full mb-4"
+                className="border border-[#cbb79b] px-3 py-2 rounded w-full mb-4 bg-[#fff5e6] text-[#6b4226]"
                 placeholder="Enter 4-digit OTP"
               />
               <div className="flex justify-end gap-2">
@@ -238,13 +241,13 @@ const Users = () => {
                     setOtp("");
                     setSelectedUser(null);
                   }}
-                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                  className="px-4 py-2 bg-[#d4c0a1] rounded hover:bg-[#c1a77e] transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleVerifyOtp}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  className="px-4 py-2 bg-[#a0522d] text-white rounded hover:bg-[#8b3f1b] transition"
                 >
                   Verify & Update
                 </button>

@@ -31,6 +31,7 @@ const [editingOrder, setEditingOrder] = useState(null);
     try {
       const res = await axios.get(API_ENDPOINTS.GET_ALL_ORDERS, { withCredentials: true });
       const allOrders = res.data?.data || [];
+      console.log(res.data)
       setOrders(allOrders);
     } catch {
       toast.error("Failed to fetch orders");
@@ -215,38 +216,43 @@ ${order.status !== "Cancelled" && order.paymentStatus !== "Paid"
               </div>
 
               {/* Actions */}
-             <div className="flex gap-2 flex-wrap">
-  {/* Status / Payment buttons */}
-  {order.status !== "Completed" && order.status !== "Cancelled" && (
+     {/* Actions */}
+<div className="flex gap-2 flex-wrap">
+  {/* Agar order completed aur paid hai, sirf delete dikhe */}
+  {!(order.status === "Completed" && order.paymentStatus === "Paid") && (
     <>
-      {order.status === "Pending" && (
+      {/* Status / Payment buttons */}
+      {order.status !== "Completed" && order.status !== "Cancelled" && (
         <>
-          <button
-            onClick={() => updateOrder(order._id, { status: "Preparing" })}
-            className="px-3 py-1 bg-yellow-400 rounded-md text-sm font-semibold"
-          >
-            Start Preparing
-          </button>
-          <button
-            onClick={() => updateOrder(order._id, { status: "Cancelled" })}
-            className="px-3 py-1 bg-red-500 rounded-md text-sm font-semibold text-white"
-          >
-            Cancel Order
-          </button>
+          {order.status === "Pending" && (
+            <>
+              <button
+                onClick={() => updateOrder(order._id, { status: "Preparing" })}
+                className="px-3 py-1 bg-yellow-400 rounded-md text-sm font-semibold"
+              >
+                Start Preparing
+              </button>
+              <button
+                onClick={() => updateOrder(order._id, { status: "Cancelled" })}
+                className="px-3 py-1 bg-red-500 rounded-md text-sm font-semibold text-white"
+              >
+                Cancel Order
+              </button>
+            </>
+          )}
+          {order.status === "Preparing" && (
+            <button
+              onClick={() => updateOrder(order._id, { status: "Completed" })}
+              className="px-3 py-1 bg-green-600 rounded-md text-sm font-semibold text-white"
+            >
+              Complete
+            </button>
+          )}
         </>
       )}
-      {order.status === "Preparing" && (
-        <button
-          onClick={() => updateOrder(order._id, { status: "Completed" })}
-          className="px-3 py-1 bg-green-600 rounded-md text-sm font-semibold text-white"
-        >
-          Complete
-        </button>
-      )}
-     
-    </>
-  )}
-   {order.paymentStatus === "Unpaid" &&  order.status !== "Cancelled" && (
+
+      {/* Payment button */}
+      {order.paymentStatus === "Unpaid" && order.status !== "Cancelled" && (
         <button
           onClick={() => updateOrder(order._id, { paymentStatus: "Paid" })}
           className="px-3 py-1 bg-green-500 rounded-md text-sm font-semibold text-white"
@@ -255,19 +261,17 @@ ${order.status !== "Cancelled" && order.paymentStatus !== "Paid"
         </button>
       )}
 
+      {/* Edit button */}
+      <button
+        onClick={() => setEditingOrder(order)}
+        className="px-3 py-1 bg-blue-500 rounded-md text-sm font-semibold text-white"
+      >
+        Edit
+      </button>
+    </>
+  )}
 
-  {/*Edit Order Button  */}
-<button
-  onClick={() => setEditingOrder(order)}
-  className="px-3 py-1 bg-blue-500 rounded-md text-sm font-semibold text-white"
->
-  Edit
-</button>
-
-
-
-
-  {/* ✅ Delete button (always visible) */}
+  {/* ✅ Delete button (hamesha dikhe) */}
   <button
     onClick={() => handleDeleteOrder(order._id)}
     className="px-3 py-1 bg-red-600 rounded-md text-sm font-semibold text-white"
@@ -275,6 +279,7 @@ ${order.status !== "Cancelled" && order.paymentStatus !== "Paid"
     Delete
   </button>
 </div>
+
 
 
             </motion.div>

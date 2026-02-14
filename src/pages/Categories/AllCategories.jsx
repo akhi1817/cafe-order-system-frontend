@@ -14,9 +14,6 @@ const AllCategories = ({ refresh, onChange }) => {
   const [deleteLoadingId, setDeleteLoadingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  /* ==========================
-        FETCH CATEGORIES
-  =========================== */
   const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
@@ -36,9 +33,6 @@ const AllCategories = ({ refresh, onChange }) => {
     fetchCategories();
   }, [refresh, fetchCategories]);
 
-  /* ==========================
-          DELETE CATEGORY
-  =========================== */
   const handleDelete = async (id) => {
     const confirm = window.confirm("Are you sure you want to delete this category?");
     if (!confirm) return;
@@ -59,9 +53,6 @@ const AllCategories = ({ refresh, onChange }) => {
     }
   };
 
-  /* ==========================
-            PAGINATION
-  =========================== */
   const totalPages = useMemo(
     () => Math.ceil(categories.length / ITEMS_PER_PAGE),
     [categories]
@@ -79,28 +70,28 @@ const AllCategories = ({ refresh, onChange }) => {
       transition={{ duration: 0.4 }}
       className="mt-6"
     >
-      <h3 className="text-xl font-bold text-green-800 mb-4 text-center">
+      <h3 className="text-xl font-bold text-[#6F4E37] mb-4 text-center">
         📦 All Categories
       </h3>
 
       {loading ? (
-        <p className="text-green-700 text-center py-4">Loading...</p>
+        <p className="text-[#6F4E37] text-center py-4">Loading...</p>
       ) : (
-        <div className="overflow-x-auto bg-white/70 backdrop-blur-xl border border-green-200 rounded-2xl shadow-xl">
+        <div className="overflow-x-auto bg-[#FFF5E1]/70 backdrop-blur-xl border border-[#D9A066] rounded-2xl shadow-xl">
           <table className="w-full border-collapse">
-            <thead className="bg-yellow-200">
+            <thead className="bg-[#D9A066]">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-green-800">Name</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-green-800">Status</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-green-800">Display Order</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-green-800">Actions</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-[#FFF5E1]">Name</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-[#FFF5E1]">Status</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-[#FFF5E1]">Display Order</th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-[#FFF5E1]">Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="py-6 text-center text-green-700">
+                  <td colSpan="4" className="py-6 text-center text-[#6F4E37]">
                     No categories found
                   </td>
                 </tr>
@@ -108,15 +99,15 @@ const AllCategories = ({ refresh, onChange }) => {
                 currentItems.map((cat) => (
                   <tr
                     key={cat._id}
-                    className="border-t hover:bg-green-50 transition"
+                    className="border-t hover:bg-[#FFF3E0] transition"
                   >
-                    <td className="px-4 py-3 text-sm text-green-800">{cat.name}</td>
+                    <td className="px-4 py-3 text-sm text-[#6F4E37]">{cat.name}</td>
 
                     <td className="px-4 py-3">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
                           cat.isActive
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-[#D9A066]/30 text-[#6F4E37]"
                             : "bg-red-100 text-red-700"
                         }`}
                       >
@@ -124,14 +115,14 @@ const AllCategories = ({ refresh, onChange }) => {
                       </span>
                     </td>
 
-                    <td className="px-4 py-3 text-sm text-green-800">
+                    <td className="px-4 py-3 text-sm text-[#6F4E37]">
                       {cat.displayOrder}
                     </td>
 
                     <td className="px-4 py-3 flex justify-center gap-2">
                       <button
                         onClick={() => setEditData(cat)}
-                        className="px-3 py-1 text-sm rounded-xl bg-yellow-200 text-green-800 hover:bg-yellow-300 transition shadow-sm"
+                        className="px-3 py-1 text-sm rounded-xl bg-[#D9A066] text-[#FFF5E1] hover:bg-[#FFA726] transition shadow-sm"
                       >
                         Edit
                       </button>
@@ -166,8 +157,8 @@ const AllCategories = ({ refresh, onChange }) => {
                   className={`px-3 py-1 rounded-lg text-sm font-medium transition 
                     ${
                       currentPage === i + 1
-                        ? "bg-green-600 text-white"
-                        : "bg-yellow-200 text-green-800 hover:bg-yellow-300"
+                        ? "bg-[#6F4E37] text-[#FFF5E1]"
+                        : "bg-[#D9A066] text-[#6F4E37] hover:bg-[#FFA726]"
                     }`}
                 >
                   {i + 1}

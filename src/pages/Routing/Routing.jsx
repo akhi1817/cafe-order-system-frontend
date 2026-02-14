@@ -19,6 +19,7 @@ import UserOrders from '../Orders/UserOrders';
 import Users from '../Users/Users';
 import EditOrder from '../Orders/EditOrder';
 import AllOrders from '../Orders/AllOrders';
+import Reports from '../Reports/Reports';
 
 const Layout = () => {
   const location = useLocation();
@@ -49,6 +50,7 @@ const Layout = () => {
               <Route path='create-order' element={<CreateOrder/>}/>
               <Route path='all-orders' element={<AllOrders/>}/>
               <Route path='edit-order' element={<EditOrder/>}/>
+              <Route path='reports' element={<Reports/>}/>
           </Route>
 
         <Route path="*" element={<FallbackRoute />} />

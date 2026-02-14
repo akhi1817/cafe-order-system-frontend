@@ -14,8 +14,6 @@ const CreateOrder = ({ onSuccess }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isLoadingUI, setIsLoadingUI] = useState(true);
-  
-
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -48,24 +46,19 @@ const CreateOrder = ({ onSuccess }) => {
   // -------------------------
   // Items Management
   // -------------------------
-
   const addItem = (product) => {
     setItems((prev) => {
-      const existingIndex = prev.findIndex((i) => i.product === product.product);
-      if (existingIndex !== -1) {
-        // Increment quantity if already in order
+      const idx = prev.findIndex((i) => i.product === product.product);
+      if (idx !== -1) {
         const updated = [...prev];
-        updated[existingIndex].quantity += 1;
+        updated[idx].quantity += 1;
         return updated;
       }
       return [...prev, product];
     });
   };
 
-  const removeItem = (index) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  };
-
+  const removeItem = (index) => setItems((prev) => prev.filter((_, i) => i !== index));
   const updateItemQuantity = (index, qty) => {
     setItems((prev) => {
       const updated = [...prev];
@@ -74,83 +67,63 @@ const CreateOrder = ({ onSuccess }) => {
     });
   };
 
-// Save FULL backend order to localStorage
-const saveUserOrder = (backendOrder) => {
-  const existing = JSON.parse(localStorage.getItem("userOrders") || "[]");
-
-  const newOrder = {
-    // use EXACT backend data
-    orderId: backendOrder._id,
-    orderType: backendOrder.orderType,
-    table: backendOrder.table,
-    items: backendOrder.items,
-    status: backendOrder.status,
-    paymentStatus: backendOrder.paymentStatus,
-    totalAmount: backendOrder.totalAmount,
-    createdAt: backendOrder.createdAt,
-
-    // expireAt handle hoga user orders component me
-    expireAt: null
+  // Save FULL backend order to localStorage
+  const saveUserOrder = (backendOrder) => {
+    const existing = JSON.parse(localStorage.getItem("userOrders") || "[]");
+    const newOrder = {
+      orderId: backendOrder._id,
+      orderType: backendOrder.orderType,
+      table: backendOrder.table,
+      items: backendOrder.items,
+      status: backendOrder.status,
+      paymentStatus: backendOrder.paymentStatus,
+      totalAmount: backendOrder.totalAmount,
+      createdAt: backendOrder.createdAt,
+      expireAt: null,
+    };
+    localStorage.setItem("userOrders", JSON.stringify([...existing, newOrder]));
   };
-
-  localStorage.setItem("userOrders", JSON.stringify([...existing, newOrder]));
-};
-
-
-
 
   // -------------------------
   // Submit Order
   // -------------------------
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (loading) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
 
-  if (orderType === "Dine-in" && !table)
-    return toast.error("Please select a table");
-  if (items.length === 0)
-    return toast.error("Please select at least one product");
-  if (items.some((i) => i.quantity < 1))
-    return toast.error("Invalid quantity");
+    if (orderType === "Dine-in" && !table) return toast.error("Please select a table");
+    if (items.length === 0) return toast.error("Please select at least one product");
+    if (items.some((i) => i.quantity < 1)) return toast.error("Invalid quantity");
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const backendItems = items.map((i) => ({
-      product: i.product,
-      quantity: i.quantity,
-    }));
+    try {
+      const backendItems = items.map((i) => ({ product: i.product, quantity: i.quantity }));
+      const response = await axios.post(
+        API_ENDPOINTS.CREATE_ORDER,
+        {
+          orderType,
+          table: orderType === "Dine-in" ? table : null,
+          items: backendItems,
+        },
+        { withCredentials: true }
+      );
 
-    // ✅ FIX: store axios result
-    const response = await axios.post(
-      API_ENDPOINTS.CREATE_ORDER,
-      {
-        orderType,
-        table: orderType === "Dine-in" ? table : null,
-        items: backendItems,
-      },
-      { withCredentials: true }
-    );
+      const backendOrder = response.data.data;
 
-       // full backend order
-    const backendOrder = response.data.data;
+      saveUserOrder(backendOrder);
 
-    // SAVE FULL BACKEND ORDER TO LOCALSTORAGE
-    saveUserOrder(backendOrder);
-
-    toast.success("Order created successfully");
-    setItems([]);
-    setTable("");
-    onSuccess?.();
-    fetchTables();
-
-  } catch (err) {
-    toast.error(err.response?.data?.message || "Failed to create order");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      toast.success("Order created successfully");
+      setItems([]);
+      setTable("");
+      onSuccess?.();
+      fetchTables();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to create order");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // -------------------------
   // SHIMMER
@@ -174,7 +147,7 @@ const handleSubmit = async (e) => {
       transition={{ duration: 0.35 }}
       className="max-w-2xl mx-auto"
     >
-  {/* Page Heading */}
+      {/* Page Heading */}
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -183,37 +156,16 @@ const handleSubmit = async (e) => {
       >
         Cafe Aurora 🍽️☕
       </motion.h1>
-  
+
       {/* MENU SELECTOR MODAL */}
-      {menuOpen && (
-        <MenuSelector
-          onAddProduct={(prod) => {
-            addItem(prod);
-          }}
-          onClose={() => setMenuOpen(false)}
-        />
-      )}
-     
-    
+      {menuOpen && <MenuSelector onAddProduct={addItem} onClose={() => setMenuOpen(false)} />}
 
       <motion.form
         onSubmit={handleSubmit}
         className="bg-white/30 backdrop-blur-xl mt-8 p-6 rounded-2xl shadow-xl border border-green-200"
       >
-
         {/* Order Type */}
         <div className="flex flex-col mb-4">
-        <div className="flex justify-end mb-4">
- {/* <button
-  type="button"
-  onClick={() => navigate("/")}
-  className="w-10 h-10 bg-red-500 text-white rounded-full shadow hover:bg-red-600 flex items-center justify-center"
->
-  ✖
-</button> */}
-
-</div>
-
           <label className="text-green-900 font-medium mb-1">Order Type</label>
           <select
             value={orderType}
@@ -225,7 +177,7 @@ const handleSubmit = async (e) => {
           </select>
         </div>
 
-        {/* Table */}
+        {/* Table Selection */}
         {orderType === "Dine-in" && (
           <div className="flex flex-col mb-4">
             <label className="text-green-900 font-medium mb-1">Select Table</label>
@@ -244,30 +196,26 @@ const handleSubmit = async (e) => {
           </div>
         )}
 
-        {/* SEE MENU BUTTON */}
-        {/* 🍔 Menu Button */}
-  <button
-    type="button"
-    onClick={() => setMenuOpen(true)}
-    className="flex-1 px-5 py-3 rounded-xl font-semibold text-white bg-green-700 hover:bg-green-800"
-  >
-    🍔 Choose from Menu
-  </button>
+        {/* Menu Button */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          className="flex-1 px-5 py-3 rounded-xl font-semibold text-white bg-green-700 hover:bg-green-800"
+        >
+          🍔 Choose from Menu
+        </button>
 
         {/* Items List */}
         {items.length > 0 && (
           <div className="bg-white/40 backdrop-blur-md rounded-xl mt-5 p-4 border mb-6">
             <h4 className="font-semibold text-green-900 mb-2">Order Items</h4>
-
             {items.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 flex-wrap mb-3"
-              >
+              <div key={index} className="flex items-center gap-3 flex-wrap mb-3">
                 <div className="flex-1">
-                  <p className="font-medium text-green-900">{item.name} – ₹{item.price}</p>
+                  <p className="font-medium text-green-900">
+                    {item.name} – ₹{item.price}
+                  </p>
                 </div>
-
                 {item.image && (
                   <img
                     src={item.image}
@@ -275,17 +223,13 @@ const handleSubmit = async (e) => {
                     className="h-16 w-16 object-cover rounded-xl shadow"
                   />
                 )}
-
                 <input
                   type="number"
                   min={1}
                   value={item.quantity}
-                  onChange={(e) =>
-                    updateItemQuantity(index, Number(e.target.value))
-                  }
+                  onChange={(e) => updateItemQuantity(index, Number(e.target.value))}
                   className="glass-input w-24 text-center"
                 />
-
                 <button
                   type="button"
                   onClick={() => removeItem(index)}
@@ -298,17 +242,15 @@ const handleSubmit = async (e) => {
           </div>
         )}
 
-         {/* ✅ Submit Order */}
-  <motion.button
-    whileTap={{ scale: 0.97 }}
-    type="submit"
-    disabled={loading || (orderType === "Dine-in" && !table)}
-    className="flex-1 px-5 py-3 mx-2 my-3 rounded-xl font-semibold text-white bg-green-900 hover:bg-green-800 disabled:opacity-50"
-  >
-    {loading ? "Taking..." : "Take my Order"}
-  </motion.button>
-
-       
+        {/* Submit Order */}
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          type="submit"
+          disabled={loading || (orderType === "Dine-in" && !table)}
+          className="flex-1 px-5 py-3 mx-2 my-3 rounded-xl font-semibold text-white bg-green-900 hover:bg-green-800 disabled:opacity-50"
+        >
+          {loading ? "Taking..." : "Take my Order"}
+        </motion.button>
 
         {/* EXTRA CSS */}
         <style>{`

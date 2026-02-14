@@ -3,6 +3,23 @@ import axios from "axios";
 import { toast } from "sonner";
 import API_ENDPOINTS from "../../config/api";
 
+// Chart.js imports
+import { Line, Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Register chart components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+
 export default function OrderReports({ refresh }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -18,6 +35,7 @@ export default function OrderReports({ refresh }) {
     mobile: "9876543210",
   };
 
+  // Fetch orders
   const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
@@ -25,9 +43,8 @@ export default function OrderReports({ refresh }) {
         params: { fromDate, toDate },
         withCredentials: true,
       });
-      console.log(res.data)
       setOrders(res.data.data || []);
-      setCurrentPage(1); // reset page on new fetch
+      setCurrentPage(1);
     } catch {
       toast.error("Failed to load order reports");
     } finally {
@@ -37,7 +54,7 @@ export default function OrderReports({ refresh }) {
 
   useEffect(() => {
     fetchReports();
-  }, [fetchReports, refresh]); // ✅ refresh trigger included
+  }, [fetchReports, refresh]);
 
   const printBill = (order) => {
     const billWindow = window.open("", "_blank", "width=600,height=800");
@@ -87,14 +104,13 @@ export default function OrderReports({ refresh }) {
     billWindow.print();
   };
 
-
-
-  // Pagination logic
+  // Pagination
   const totalPages = Math.ceil(orders.length / itemsPerPage);
   const currentOrders = orders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const goNext = () => currentPage < totalPages && setCurrentPage(prev => prev + 1);
   const goPrev = () => currentPage > 1 && setCurrentPage(prev => prev - 1);
 
+  // Stats
   const stats = {
     Total: orders.length,
     Pending: orders.filter(o => o.status === "Pending").length,
@@ -102,9 +118,47 @@ export default function OrderReports({ refresh }) {
     Revenue: orders.filter(o => o.paymentStatus === "Paid").reduce((sum, o) => sum + o.totalAmount, 0),
   };
 
+  // -----------------------
+  // Chart Data Computation
+  // -----------------------
+  const productSales = {};
+  const dailySales = {};
+  const monthlySales = {};
+
+  orders.forEach(order => {
+    const date = new Date(order.createdAt);
+    const day = date.toLocaleDateString();
+    const month = date.toLocaleString("default", { month: "short", year: "numeric" });
+
+    // Daily
+    if (!dailySales[day]) dailySales[day] = 0;
+    dailySales[day] += order.totalAmount;
+
+    // Monthly
+    if (!monthlySales[month]) monthlySales[month] = 0;
+    monthlySales[month] += order.totalAmount;
+
+    // Product-wise
+    order.items.forEach(item => {
+      if (!productSales[item.name]) productSales[item.name] = 0;
+      productSales[item.name] += item.quantity;
+    });
+  });
+
+  const productLabels = Object.keys(productSales);
+  const productData = Object.values(productSales);
+
+  const dailyLabels = Object.keys(dailySales);
+  const dailyData = Object.values(dailySales);
+
+  const monthLabels = Object.keys(monthlySales);
+  const monthData = Object.values(monthlySales);
+
+  // -----------------------
+  // JSX
+  // -----------------------
   return (
     <div className="p-4 md:p-6 bg-green-50/70 backdrop-blur-xl border border-green-200 rounded-2xl shadow-2xl">
-
       <h1 className="text-2xl md:text-3xl font-bold text-green-900 mb-6 text-center">Order Reports</h1>
 
       {/* Stats */}
@@ -117,7 +171,41 @@ export default function OrderReports({ refresh }) {
         ))}
       </div>
 
-      
+      {/* Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Product-wise */}
+        {/* <div className="bg-white p-4 rounded-xl shadow">
+          <h3 className="text-green-900 font-semibold mb-2 text-center">Product-wise Sales</h3>
+          <Bar
+            data={{ labels: productLabels, datasets: [{ label: "Units Sold", data: productData, backgroundColor: "#E53935" }] }}
+            options={{ responsive: true, plugins: { legend: { display: false } } }}
+          />
+        </div> */}
+
+        {/* Daily Sales */}
+        {/* <div className="bg-white p-4 rounded-xl shadow">
+          <h3 className="text-green-900 font-semibold mb-2 text-center">Daily Sales</h3>
+          <Line
+            data={{
+              labels: dailyLabels,
+              datasets: [{ label: "Revenue", data: dailyData, borderColor: "#E53935", backgroundColor: "rgba(229,57,53,0.2)", fill: true, tension: 0.3 }],
+            }}
+            options={{ responsive: true }}
+          />
+        </div> */}
+{/* 
+        Monthly Sales */}
+        {/* <div className="bg-white p-4 rounded-xl shadow md:col-span-2">
+          <h3 className="text-green-900 font-semibold mb-2 text-center">Monthly Sales</h3>
+          <Line
+            data={{
+              labels: monthLabels,
+              datasets: [{ label: "Revenue", data: monthData, borderColor: "#E53935", backgroundColor: "rgba(229,57,53,0.2)", fill: true, tension: 0.3 }],
+            }}
+            options={{ responsive: true }}
+          />
+        </div> */}
+      </div>
 
       {/* Orders Table */}
       <div className="overflow-x-auto rounded-2xl shadow border border-green-200">
@@ -175,7 +263,6 @@ export default function OrderReports({ refresh }) {
           <button onClick={goNext} disabled={currentPage===totalPages} className="px-3 py-1 rounded bg-green-200 text-green-900 disabled:opacity-50">Next</button>
         </div>
       )}
-
     </div>
   );
 }

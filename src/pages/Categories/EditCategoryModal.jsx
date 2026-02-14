@@ -15,9 +15,6 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
 
   const modalRef = useRef(null);
 
-  /* ------------------------------
-      Sync data when modal reopens
-  ------------------------------- */
   useEffect(() => {
     setForm({
       name: data.name,
@@ -26,27 +23,18 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
     });
   }, [data]);
 
-  /* ------------------------------
-      Close on ESC
-  ------------------------------- */
   useEffect(() => {
     const closeOnEsc = (e) => e.key === "Escape" && !loading && onClose();
     window.addEventListener("keydown", closeOnEsc);
     return () => window.removeEventListener("keydown", closeOnEsc);
   }, [loading, onClose]);
 
-  /* ------------------------------
-      Click Outside to Close
-  ------------------------------- */
   const handleClickOutside = (e) => {
     if (modalRef.current && !modalRef.current.contains(e.target) && !loading) {
       onClose();
     }
   };
 
-  /* ------------------------------
-      Update Category
-  ------------------------------- */
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
@@ -90,13 +78,13 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 30 }}
           transition={{ duration: 0.25 }}
-          className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden"
+          className="w-full max-w-md bg-[#FFF5E1] rounded-2xl shadow-xl overflow-hidden"
           role="dialog"
           aria-modal="true"
         >
           {/* Header */}
-          <div className="px-6 py-4 border-b bg-green-50">
-            <h3 className="text-lg font-semibold text-green-800">
+          <div className="px-6 py-4 border-b border-[#D9A066] bg-[#D9A066]/20">
+            <h3 className="text-lg font-semibold text-[#6F4E37]">
               Edit Category
             </h3>
           </div>
@@ -105,7 +93,7 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
           <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-green-700 mb-1">
+              <label className="block text-sm font-medium text-[#6F4E37] mb-1">
                 Category Name
               </label>
               <input
@@ -116,14 +104,14 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
                 }
                 disabled={loading}
                 required
-                className="w-full px-4 py-2 border rounded-xl bg-white text-sm
-                  focus:ring-2 focus:ring-green-300 focus:outline-none disabled:bg-gray-100"
+                className="w-full px-4 py-2 border rounded-xl bg-[#FFF5E1] text-sm
+                  focus:ring-2 focus:ring-[#FFA726] focus:outline-none disabled:bg-gray-100"
               />
             </div>
 
             {/* Display Order */}
             <div>
-              <label className="block text-sm font-medium text-green-700 mb-1">
+              <label className="block text-sm font-medium text-[#6F4E37] mb-1">
                 Display Order
               </label>
               <input
@@ -136,14 +124,14 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
                   }))
                 }
                 disabled={loading}
-                className="w-full px-4 py-2 border rounded-xl bg-white text-sm
-                  focus:ring-2 focus:ring-green-300 focus:outline-none disabled:bg-gray-100"
+                className="w-full px-4 py-2 border rounded-xl bg-[#FFF5E1] text-sm
+                  focus:ring-2 focus:ring-[#FFA726] focus:outline-none disabled:bg-gray-100"
               />
             </div>
 
             {/* Status Toggle */}
             <div>
-              <label className="block text-sm font-medium text-green-700 mb-2">
+              <label className="block text-sm font-medium text-[#6F4E37] mb-2">
                 Status
               </label>
 
@@ -156,14 +144,14 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
                 className={`w-full py-2 rounded-xl text-sm font-semibold transition
                   ${
                     form.isActive
-                      ? "bg-green-100 text-green-700 hover:bg-green-200"
+                      ? "bg-[#D9A066]/30 text-[#6F4E37] hover:bg-[#D9A066]/50"
                       : "bg-red-100 text-red-700 hover:bg-red-200"
                   }`}
               >
                 {form.isActive ? "Active" : "Inactive"}
               </button>
 
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-[#6F4E37]/70">
                 {form.isActive
                   ? "Category is visible to customers"
                   : "Category is hidden from customer view"}
@@ -176,8 +164,8 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700
-                  hover:bg-gray-100 transition disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded-lg border border-[#D9A066] text-[#6F4E37]
+                  hover:bg-[#FFF3E0] transition disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -185,8 +173,8 @@ const EditCategoryModal = ({ data, onClose, onSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 text-sm rounded-lg bg-green-600 text-white
-                  hover:bg-green-700 transition disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded-lg bg-[#6F4E37] text-[#FFF5E1]
+                  hover:bg-[#5A3E2D] transition disabled:opacity-50"
               >
                 {loading ? "Saving..." : "Save Changes"}
               </button>

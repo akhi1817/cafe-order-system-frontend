@@ -8,12 +8,12 @@ import { useSelector } from "react-redux";
 
 // 🌟 Shimmer Component
 const Shimmer = ({ width = "w-full", height = "h-6", rounded = "rounded-xl", className = "" }) => (
-  <div className={`relative ${width} ${height} ${rounded} bg-green-100 overflow-hidden ${className}`}>
+  <div className={`relative ${width} ${height} ${rounded} bg-[#FFF5E1] overflow-hidden ${className}`}>
     <motion.div
       initial={{ x: "-100%" }}
       animate={{ x: "100%" }}
       transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-      className="absolute inset-0 w-1/2 bg-linear-to-r from-transparent via-green-300 to-transparent"
+      className="absolute inset-0 w-1/2 bg-linear-to-r from-transparent via-[#D9A066] to-transparent"
     />
   </div>
 );
@@ -38,6 +38,8 @@ const AdminDashboard = () => {
       { title: "Users", route: "/admin-dashboard/users", roles: ["admin", "manager"] },
       { title: "Create Orders", route: "/admin-dashboard/create-order", roles: ["admin", "manager", "staff"] },
       { title: "All Orders", route: "/admin-dashboard/all-orders", roles: ["admin", "manager", "staff"] },
+      { title: "Reports", route: "/admin-dashboard/reports", roles: ["admin"] },
+
     ],
     []
   );
@@ -83,9 +85,9 @@ const AdminDashboard = () => {
   }, [fetchOrders]);
 
   return (
-    <>
+       <>
       {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-linear-to-r from-green-300 to-green-50 text-green-900 flex items-center px-4 py-3 z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-linear-to-r from-[#D9A066] to-[#FFF5E1] text-[#3E2723] flex items-center px-4 py-3 z-50">
         <button onClick={() => setMobileOpen(true)} className="text-2xl">☰</button>
         <span className="ml-4 font-bold text-lg">Admin Panel</span>
       </div>
@@ -94,10 +96,10 @@ const AdminDashboard = () => {
         {/* Sidebar */}
         <aside
           className={`flex flex-col fixed md:static top-0 left-0 h-full z-50 w-48 md:w-64 transform transition-transform duration-300
-            bg-linear-to-b from-green-300 to-green-50 text-green-900
+            bg-linear-to-b from-[#D9A066] to-[#FFF5E1] text-[#3E2723]
             ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
         >
-          <div className="p-6 text-center font-bold text-xl border-b border-green-400">
+          <div className="p-6 text-center font-bold text-xl border-b border-[#6F4E37]">
             {pendingOrdersCount === null ? <Shimmer width="w-1/2" /> : "Admin Panel"}
           </div>
 
@@ -109,7 +111,7 @@ const AdminDashboard = () => {
                     navigate(item.route);
                     setMobileOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 rounded hover:bg-green-100 hover:text-green-900 transition flex justify-between items-center font-semibold"
+                  className="w-full text-left px-3 py-2 rounded hover:bg-[#FFF3E0] hover:text-[#6F4E37] transition flex justify-between items-center font-semibold"
                 >
                   {pendingOrdersCount === null ? <Shimmer width="w-2/3" height="h-5" /> : <span>{item.title}</span>}
 
@@ -120,8 +122,8 @@ const AdminDashboard = () => {
                       transition={{ duration: 1, repeat: Infinity }}
                       className={`text-xs px-2 py-0.5 rounded-full font-semibold 
                         ${pendingOrdersCount === null
-                          ? "bg-green-100 text-green-300 animate-pulse"
-                          : "bg-red-600 text-white"
+                          ? "bg-[#FFF3E0] text-[#D9A066] animate-pulse"
+                          : "bg-[#6F4E37] text-[#FFF5E1]"
                         }`}
                     >
                       {pendingOrdersCount === null ? "" : pendingOrdersCount}
@@ -132,10 +134,10 @@ const AdminDashboard = () => {
             ))}
           </ul>
 
-          <div className="p-4 border-t border-green-400">
+          <div className="p-4 border-t border-[#6F4E37]">
             <button
               onClick={handleLogout}
-              className="w-full bg-green-600 hover:bg-green-700 py-2 rounded text-white font-medium"
+              className="w-full bg-[#6F4E37] hover:bg-[#5A3E2D] py-2 rounded text-[#FFF5E1] font-medium"
             >
               Logout
             </button>
@@ -144,7 +146,7 @@ const AdminDashboard = () => {
 
         {/* Dark Overlay (Mobile Only) */}
         {mobileOpen && (
-          <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileOpen(false)} />
+          <div className="fixed inset-0 bg-black/30 z-40 md:hidden" onClick={() => setMobileOpen(false)} />
         )}
 
         {/* Main Content */}
@@ -152,12 +154,12 @@ const AdminDashboard = () => {
           {pendingOrdersCount === null ? (
             <Shimmer width="w-1/3" height="h-8" className="mb-4" />
           ) : (
-            <h1 className="text-3xl font-bold text-green-800 mb-4">Welcome, Admin!</h1>
+            <h1 className="text-3xl font-bold text-[#6F4E37] mb-4">Welcome, Admin!</h1>
           )}
 
-          <p className="text-green-700 mb-6">Select a module from the sidebar to manage data.</p>
+          <p className="text-[#6F4E37] mb-6">Select a module from the sidebar to manage data.</p>
 
-          <div className="bg-green-50 shadow rounded-xl p-6 h-full">
+          <div className="bg-[#FFF5E1] shadow rounded-xl p-6 h-full">
             <Outlet />
           </div>
         </main>
