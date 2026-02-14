@@ -175,146 +175,163 @@ export default function Reports({ refresh }) {
   </div>
 
   {/* Charts */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    {/* Product-wise Bar Chart */}
-    <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-      <h3 className="text-green-900 font-semibold mb-3 text-center text-lg md:text-xl tracking-wide">
-        Product-wise Sales
-      </h3>
-      <Bar
+ {/* Charts */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+  {/* Product-wise Bar Chart */}
+  <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 max-h-[600px] overflow-y-auto">
+    <h3 className="text-green-900 font-semibold mb-3 text-center text-lg md:text-xl tracking-wide">
+      Product-wise Sales
+    </h3>
+    <Bar
+      data={{
+        labels: productLabels,
+        datasets: [
+          {
+            label: "Units Sold",
+            data: productData,
+            backgroundColor: "rgba(67,160,71,0.8)",
+            borderRadius: 5,
+          },
+        ],
+      }}
+      options={{
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const total = productData.reduce((a, b) => a + b, 0);
+                const percent = ((context.parsed.x / total) * 100).toFixed(1);
+                return `${context.parsed.x} units (${percent}%)`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              callback: function (value) {
+                if (value >= 1000000) return value / 1000000 + "M";
+                if (value >= 1000) return value / 1000 + "k";
+                return value;
+              },
+            },
+          },
+        },
+      }}
+    />
+  </div>
+
+  {/* Daily Revenue */}
+  <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 max-h-[400px] overflow-x-auto">
+    <h3 className="text-green-900 font-semibold mb-3 text-center text-lg md:text-xl tracking-wide">
+      Daily Revenue (Last 7 Days)
+    </h3>
+    {dailyLabels.length > 0 ? (
+      <Line
         data={{
-          labels: productLabels,
+          labels: dailyLabels
+            .map((date, idx) => ({ date, value: dailyData[idx] }))
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .slice(-7)
+            .map((d) => d.date),
           datasets: [
             {
-              label: "Units Sold",
-              data: productData,
-              backgroundColor: "rgba(67,160,71,0.8)",
-              borderRadius: 5,
+              label: "Revenue",
+              data: dailyLabels
+                .map((date, idx) => ({ date, value: dailyData[idx] }))
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(-7)
+                .map((d) => d.value),
+              borderColor: "#43A047",
+              backgroundColor: "rgba(67,160,71,0.2)",
+              fill: true,
+              tension: 0.3,
+              pointHoverRadius: 6,
+              pointRadius: 4,
             },
           ],
         }}
         options={{
-          indexAxis: "y",
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (context) => {
-                  const total = productData.reduce((a, b) => a + b, 0);
-                  const percent = ((context.parsed.x / total) * 100).toFixed(1);
-                  return `${context.parsed.x} units (${percent}%)`;
-                },
+                label: (context) => `₹${context.parsed.y}`,
               },
             },
           },
-          scales: { x: { beginAtZero: true } },
+          scales: {
+            y: { beginAtZero: true },
+            x: { ticks: { autoSkip: false } },
+          },
         }}
       />
-    </div>
-
-    {/* Daily Revenue */}
-    <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-      <h3 className="text-green-900 font-semibold mb-3 text-center text-lg md:text-xl tracking-wide">
-        Daily Revenue (Last 7 Days)
-      </h3>
-      {dailyLabels.length > 0 ? (
-        <Line
-          data={{
-            labels: dailyLabels
-              .map((date, idx) => ({ date, value: dailyData[idx] }))
-              .sort((a, b) => new Date(a.date) - new Date(b.date))
-              .slice(-7)
-              .map((d) => d.date),
-            datasets: [
-              {
-                label: "Revenue",
-                data: dailyLabels
-                  .map((date, idx) => ({ date, value: dailyData[idx] }))
-                  .sort((a, b) => new Date(a.date) - new Date(b.date))
-                  .slice(-7)
-                  .map((d) => d.value),
-                borderColor: "#43A047",
-                backgroundColor: "rgba(67,160,71,0.2)",
-                fill: true,
-                tension: 0.3,
-                pointHoverRadius: 6,
-                pointRadius: 4,
-              },
-            ],
-          }}
-          options={{
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (context) => `₹${context.parsed.y}`,
-                },
-              },
-            },
-            scales: {
-              y: { beginAtZero: true },
-              x: { ticks: { autoSkip: false } },
-            },
-          }}
-        />
-      ) : (
-        <p className="text-center text-green-800">No sales data</p>
-      )}
-    </div>
-
-    {/* Monthly Revenue */}
-    <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 md:col-span-2">
-      <h3 className="text-green-900 font-semibold mb-3 text-center text-lg md:text-xl tracking-wide">
-        Monthly Revenue (Last 6 Months)
-      </h3>
-      {monthLabels.length > 0 ? (
-        <Line
-          data={{
-            labels: monthLabels
-              .map((month, idx) => ({ month, value: monthData[idx] }))
-              .sort((a, b) => new Date(a.month) - new Date(b.month))
-              .slice(-6)
-              .map((d) => d.month),
-            datasets: [
-              {
-                label: "Revenue",
-                data: monthLabels
-                  .map((month, idx) => ({ month, value: monthData[idx] }))
-                  .sort((a, b) => new Date(a.month) - new Date(b.month))
-                  .slice(-6)
-                  .map((d) => d.value),
-                borderColor: "#43A047",
-                backgroundColor: "rgba(67,160,71,0.2)",
-                fill: true,
-                tension: 0.3,
-                pointHoverRadius: 6,
-                pointRadius: 4,
-              },
-            ],
-          }}
-          options={{
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (context) => `₹${context.parsed.y}`,
-                },
-              },
-            },
-            scales: {
-              y: { beginAtZero: true },
-              x: { ticks: { autoSkip: false } },
-            },
-          }}
-        />
-      ) : (
-        <p className="text-center text-green-800">No sales data</p>
-      )}
-    </div>
+    ) : (
+      <p className="text-center text-green-800">No sales data</p>
+    )}
   </div>
+
+  {/* Monthly Revenue */}
+  <div className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 md:col-span-2 max-h-[400px] overflow-x-auto">
+    <h3 className="text-green-900 font-semibold mb-3 text-center text-lg md:text-xl tracking-wide">
+      Monthly Revenue (Last 6 Months)
+    </h3>
+    {monthLabels.length > 0 ? (
+      <Line
+        data={{
+          labels: monthLabels
+            .map((month, idx) => ({ month, value: monthData[idx] }))
+            .sort((a, b) => new Date(a.month) - new Date(b.month))
+            .slice(-6)
+            .map((d) => d.month),
+          datasets: [
+            {
+              label: "Revenue",
+              data: monthLabels
+                .map((month, idx) => ({ month, value: monthData[idx] }))
+                .sort((a, b) => new Date(a.month) - new Date(b.month))
+                .slice(-6)
+                .map((d) => d.value),
+              borderColor: "#43A047",
+              backgroundColor: "rgba(67,160,71,0.2)",
+              fill: true,
+              tension: 0.3,
+              pointHoverRadius: 6,
+              pointRadius: 4,
+            },
+          ],
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (context) => `₹${context.parsed.y}`,
+              },
+            },
+          },
+          scales: {
+            y: { beginAtZero: true },
+            x: { ticks: { autoSkip: false } },
+          },
+        }}
+      />
+    ) : (
+      <p className="text-center text-green-800">No sales data</p>
+    )}
+  </div>
+</div>
+
 </div>
 
   );

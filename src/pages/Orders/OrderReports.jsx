@@ -56,53 +56,137 @@ export default function OrderReports({ refresh }) {
     fetchReports();
   }, [fetchReports, refresh]);
 
-  const printBill = (order) => {
-    const billWindow = window.open("", "_blank", "width=600,height=800");
-    billWindow.document.write(`
-      <html>
-        <head>
-          <title>Bill - ${order._id}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; color: #3F4F1D; }
-            h2 { text-align: center; margin-bottom: 5px; }
-            .info { margin-bottom: 5px; text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { border: 1px solid #A3D9A5; padding: 8px; text-align: left; }
-            th { background-color: #DFFFD6; }
-            .total { text-align: right; font-weight: bold; margin-top: 10px; }
-          </style>
-        </head>
-        <body>
-          <h2>${cafeInfo.name}</h2>
-          <div class="info">${cafeInfo.address}</div>
-          <div class="info">📞 ${cafeInfo.mobile}</div>
-          <div class="info">🕒 ${new Date(order.createdAt).toLocaleString()}</div>
-          <div class="info">Order Type: ${order.orderType} ${order.table?.tableNumber ? `(Table #${order.table.tableNumber})` : ""}</div>
-          <table>
-            <thead>
+
+  // Generate Bill No from order date
+const orderDate = new Date(); // ya new Date() agar current time chahiye
+const day = String(orderDate.getDate()).padStart(2, "0");
+const month = String(orderDate.getMonth() + 1).padStart(2, "0"); // month 0 se start hota hai
+const year = String(orderDate.getFullYear()).slice(-2); // last 2 digits
+const billNo = `AC-${day}${month}${year}`; // 130228
+
+const printBill = (order) => {
+  const billWindow = window.open("", "_blank", "width=400,height=800");
+
+  const orderDate = new Date(order.createdAt);
+  const day = String(orderDate.getDate()).padStart(2, "0");
+  const month = String(orderDate.getMonth() + 1).padStart(2, "0");
+  const year = String(orderDate.getFullYear()).slice(-2);
+  const billNo = `${day}${month}${year}`; // e.g., 130228
+
+  const itemsPerPage = 25; // adjust based on printer size
+  const pages = Math.ceil(order.items.length / itemsPerPage);
+
+  let content = "";
+
+  for (let p = 0; p < pages; p++) {
+    const start = p * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = order.items.slice(start, end);
+
+    content += `
+      <div style="page-break-after: ${p < pages - 1 ? 'always' : 'auto'};">
+        <div class="center bold" style="font-size:16px;">${cafeInfo.name}</div>
+        <div class="center">${cafeInfo.address}</div>
+        <div class="center">Tel: ${cafeInfo.mobile}</div>
+        <div class="line"></div>
+
+        <div class="center bold">TAX INVOICE</div>
+
+        <div style="margin-top:5px; font-family: monospace; font-size:14px;">
+          <div class="flex">
+            <div>Date: ${orderDate.toLocaleDateString()}</div>
+            <div>Time: ${orderDate.toLocaleTimeString()}</div>
+          </div>
+          <div style="margin-top:5px;">Bill No: <strong>${billNo}</strong></div>
+        </div>
+
+        <div class="line"></div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th align="center">Qty</th>
+              <th align="right">Rate</th>
+              <th class="right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pageItems.map(i => `
               <tr>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Price</th>
+                <td>${i.name}</td>
+                <td align="center">${i.quantity}</td>
+                <td align="right">₹${i.price}</td>
+                <td align="right">₹${i.price * i.quantity}</td>
               </tr>
-            </thead>
-            <tbody>
-              ${order.items.map((i, idx) => `
-                <tr style="background-color: ${idx % 2 === 0 ? '#E6F9E6' : '#DFFFD6'}">
-                  <td>${i.name}</td>
-                  <td>${i.quantity}</td>
-                  <td>₹${i.price * i.quantity}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-          <div class="total">Total: ₹${order.totalAmount}</div>
-        </body>
-      </html>
-    `);
-    billWindow.document.close();
-    billWindow.print();
-  };
+            `).join("")}
+          </tbody>
+        </table>
+
+        ${p === pages - 1 ? `
+          <div class="line"></div>
+          <div class="total-section">
+            <div>Items: ${order.items.length}</div>
+            <div class="right">SUB TOTAL : ₹${order.totalAmount}</div>
+            <div class="right bold">TOTAL : ₹${order.totalAmount}</div>
+          </div>
+
+          <div class="line"></div>
+          <div class="center bold" style="font-size:14px;">
+            Cash : ₹${order.totalAmount}
+          </div>
+
+          <div class="line"></div>
+
+          <div style="font-size:11px;">
+            GST No : ${cafeInfo.gst || ""}
+            <br/><br/>
+            We declare that this invoice shows the actual price
+            of the food items described and that all particulars are
+            true and correct.
+          </div>
+
+          <div class="line"></div>
+
+          <div class="center" style="font-size:11px;">
+            Items once sold will not be taken back.
+            <br/>
+            Visit Again !!!
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  billWindow.document.write(`
+    <html>
+      <head>
+        <title>Bill - ${billNo}</title>
+        <style>
+          body { font-family: monospace; width: 280px; margin: auto; font-size: 13px; }
+          .center { text-align: center; }
+          .line { border-top: 1px dashed #000; margin: 6px 0; }
+          table { width: 100%; font-size: 13px; border-collapse: collapse; }
+          th, td { padding: 2px 0; }
+          th { text-align: left; }
+          .right { text-align: right; }
+          .bold { font-weight: bold; }
+          .total-section { margin-top: 5px; }
+          .flex { display: flex; justify-content: space-between; }
+        </style>
+      </head>
+      <body>
+        ${content}
+      </body>
+    </html>
+  `);
+
+  billWindow.document.close();
+  billWindow.print();
+};
+
+
+
 
   // Pagination
   const totalPages = Math.ceil(orders.length / itemsPerPage);
