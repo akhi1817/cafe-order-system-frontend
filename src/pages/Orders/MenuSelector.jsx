@@ -336,15 +336,26 @@ useEffect(() => {
 <div className="flex flex-col gap-3 mb-4">
 
   {/* 🌟 Voice Order Instructions */}
-  <div className="bg-green-50/60 backdrop-blur-md p-3 rounded-xl border border-green-200">
-    <p className="text-green-900 font-medium mb-1">💡 How to give voice order:</p>
-    <ul className="text-green-800 text-sm list-disc list-inside space-y-1">
-      <li>Say quantity and product name: <strong>"2 spring roll"</strong></li>
-      <li>Combine multiple items using "and": <strong>"1 gulab jamun and 2 cappuccino"</strong></li>
-      <li>Minor spelling errors are okay: <strong>"late"</strong> → <em>latte</em></li>
-      <li>If you don’t mention quantity, 1 will be added by default</li>
-    </ul>
-  </div>
+ {/* 🌟 Voice Order Instructions */}
+<div className="bg-green-50/60 backdrop-blur-md p-3 rounded-xl border border-green-200 mb-3">
+  <p className="text-green-900 font-medium mb-1">💡 How to give voice order:</p>
+  <ul className="text-green-800 text-sm list-disc list-inside space-y-1">
+    <li>Always mention <strong>quantity first</strong> (optional, default 1 if skipped): <em>"2 spring roll"</em></li>
+    <li>Combine multiple items using <strong>"and"</strong> or commas: <em>"1 gulab jamun and 2 cappuccino"</em></li>
+    <li>Minor spelling mistakes are okay — system will auto-correct or match closest product: <em>"late"</em> → <strong>Latte</strong></li>
+    <li>Voice order works <strong>across all categories</strong> (starters, desserts, drinks, mains)</li>
+    <li>If product not found, check spelling or try saying a similar name</li>
+    <li>Speak clearly and pause <strong>2 seconds</strong> after finishing your order for processing</li>
+  </ul>
+  <p className="text-green-700 text-sm mt-2 italic">Example orders you can try:</p>
+  <ul className="text-green-800 text-sm list-disc list-inside">
+    <li>"2 spring roll and 1 gulab jamun"</li>
+    <li>"1 paneer butter masala and 2 garlic naan"</li>
+    <li>"1 latte, 2 cappuccino"</li>
+    <li>"3 french fries and 1 cold coffee"</li>
+  </ul>
+</div>
+
 
   {/* 🌟 Voice Order Button */}
   <button
