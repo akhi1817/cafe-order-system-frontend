@@ -32,6 +32,8 @@ const Menu = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [recommended, setRecommended] = useState([]);
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -78,6 +80,22 @@ const Menu = () => {
     }, 500),
     []
   );
+
+
+  // Fetch AI Recommendations (Top 5)
+useEffect(() => {
+  const fetchRecommendations = async () => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.GET_AI_RECOMMENDATIONS);
+      setRecommended(res.data?.data || []);
+    } catch (err) {
+      console.log("Failed to load recommendations");
+    }
+  };
+
+  fetchRecommendations();
+}, []);
+
 
   useEffect(() => {
     fetchProducts({
@@ -130,6 +148,50 @@ const Menu = () => {
     </motion.select>
   </div>
 
+
+  {/* --- AI Recommendations --- */}
+{recommended.length > 0 && (
+  <div className="mb-8">
+    <h3 className="text-xl font-bold text-[#3F4F1D] mb-4">
+      ✨ Recommended For You
+    </h3>
+
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+      {recommended.map((item) => (
+        <motion.div
+          key={item._id}
+          variants={cardVariant}
+          initial="hidden"
+          animate="visible"
+          whileHover={{ scale: 1.05 }}
+          className="group rounded-2xl overflow-hidden bg-yellow-50 border border-yellow-300 shadow-md p-3"
+        >
+          {/* Product Image */}
+          <div className="relative h-32 rounded-xl overflow-hidden">
+            {item.image ? (
+              <img
+                src={item.image}
+                alt={item.name}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-400 text-sm">
+                No Image
+              </div>
+            )}
+          </div>
+
+          <div className="mt-3 text-center">
+            <p className="font-semibold text-[#3F4F1D] truncate">{item.name}</p>
+            <p className="font-bold text-[#6B8E23]">₹{item.price}</p>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+)}
+
+
   {/* --- Category Tabs --- */}
   <div className="flex flex-wrap gap-3 mb-6">
     <button
@@ -160,7 +222,7 @@ const Menu = () => {
 
   {/* --- Product Grid --- */}
   {loading ? (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-4">
       {Array.from({ length: LIMIT }).map((_, i) => (
         <div
           key={i}

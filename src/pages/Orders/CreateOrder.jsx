@@ -12,6 +12,7 @@ const CreateOrder = ({ onSuccess }) => {
   const [table, setTable] = useState("");
   const [tables, setTables] = useState([]);
   const [items, setItems] = useState([]);
+  const [recommendedItems, setRecommendedItems] = useState([]); // 🌟 ADDED
   const [loading, setLoading] = useState(false);
   const [isLoadingUI, setIsLoadingUI] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -59,6 +60,7 @@ const CreateOrder = ({ onSuccess }) => {
   };
 
   const removeItem = (index) => setItems((prev) => prev.filter((_, i) => i !== index));
+
   const updateItemQuantity = (index, qty) => {
     setItems((prev) => {
       const updated = [...prev];
@@ -67,7 +69,7 @@ const CreateOrder = ({ onSuccess }) => {
     });
   };
 
-  // Save FULL backend order to localStorage
+  // Save order to localStorage
   const saveUserOrder = (backendOrder) => {
     const existing = JSON.parse(localStorage.getItem("userOrders") || "[]");
     const newOrder = {
@@ -84,6 +86,22 @@ const CreateOrder = ({ onSuccess }) => {
     localStorage.setItem("userOrders", JSON.stringify([...existing, newOrder]));
   };
 
+  // ----------------------------------------
+  // 🌟 AI Recommendation Engine Function
+  // ----------------------------------------
+  const fetchRecommendations = async () => {
+  try {
+    const res = await axios.get(API_ENDPOINTS.GET_AI_RECOMMENDATIONS, {
+      withCredentials: true,
+    });
+
+    setRecommendedItems(res.data?.data || []);
+  } catch (error) {
+    console.log("AI Recommendation Error:", error);
+  }
+};
+
+
   // -------------------------
   // Submit Order
   // -------------------------
@@ -98,7 +116,11 @@ const CreateOrder = ({ onSuccess }) => {
     setLoading(true);
 
     try {
-      const backendItems = items.map((i) => ({ product: i.product, quantity: i.quantity }));
+      const backendItems = items.map((i) => ({
+        product: i.product,
+        quantity: i.quantity,
+      }));
+
       const response = await axios.post(
         API_ENDPOINTS.CREATE_ORDER,
         {
@@ -199,7 +221,10 @@ const CreateOrder = ({ onSuccess }) => {
         {/* Menu Button */}
         <button
           type="button"
-          onClick={() => setMenuOpen(true)}
+          onClick={async () => {
+            setMenuOpen(true);
+            await fetchRecommendations(); // 🌟 AI GETS TRIGGERED HERE
+          }}
           className="flex-1 px-5 py-3 rounded-xl font-semibold text-white bg-green-700 hover:bg-green-800"
         >
           🍔 Choose from Menu
@@ -241,6 +266,8 @@ const CreateOrder = ({ onSuccess }) => {
             ))}
           </div>
         )}
+
+   
 
         {/* Submit Order */}
         <motion.button

@@ -15,6 +15,7 @@ const MenuSelector = ({ onAddProduct, onClose }) => {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [loading, setLoading] = useState(true);
+  const [recommended, setRecommended] = useState([]);
 
   // Fetch categories
   useEffect(() => {
@@ -59,6 +60,22 @@ const MenuSelector = ({ onAddProduct, onClose }) => {
     fetchProducts();
   }, [selectedCategory]);
 
+  useEffect(() => {
+  const fetchRecommendations = async () => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.GET_AI_RECOMMENDATIONS, {
+        withCredentials: true,
+      });
+      setRecommended(res.data?.data || []);
+    } catch (err) {
+      console.log("Failed to load recommendations");
+    }
+  };
+
+  fetchRecommendations();
+}, []);
+
+
   // Memoized category buttons
   const categoryButtons = useMemo(
     () =>
@@ -90,6 +107,59 @@ const MenuSelector = ({ onAddProduct, onClose }) => {
             Close
           </button>
         </div>
+{recommended.length > 0 && (
+  <div className="mb-6">
+    <h3 className="text-lg font-bold text-green-900 mb-3">✨ Recommended For You</h3>
+
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+      {recommended.map((item) => (
+        <motion.div
+          key={item._id}
+          variants={cardVariant}
+          initial="hidden"
+          animate="visible"
+          className="bg-yellow-50 border border-yellow-300 rounded-xl p-3 shadow-sm flex flex-col"
+        >
+          {/* ⭐ IMAGE */}
+          <div className="h-24 w-full overflow-hidden rounded-lg bg-white">
+            {item.image ? (
+              <img
+                src={item.image}
+                alt={item.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-400 text-xs">
+                No Image
+              </div>
+            )}
+          </div>
+
+          <p className="font-semibold text-green-900 truncate mt-2">
+            {item.name}
+          </p>
+
+          <p className="text-green-700 font-bold">₹{item.price}</p>
+
+          <button
+            className="mt-2 py-1 rounded-lg bg-green-600 text-white text-sm hover:bg-green-700"
+            onClick={() =>
+              onAddProduct({
+                product: item._id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                quantity: 1,
+              })
+            }
+          >
+            Add
+          </button>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2 mb-6">{categoryButtons}</div>

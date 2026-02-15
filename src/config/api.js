@@ -71,6 +71,12 @@ EDIT_ORDER_ITEMS: (id) => `${baseurl}/api/orders/${id}/edit-items`, // PATCH
 
   // 🟣 Reports (History)
   GET_ORDER_REPORTS: `${baseurl}/api/orders/reports`,
+
+  GET_AI_RECOMMENDATIONS: `${baseurl}/api/orders/recommendations`,  // ⭐ GET request
+
 };
+
+
+
 
 export default API_ENDPOINTS;
