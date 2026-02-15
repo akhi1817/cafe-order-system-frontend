@@ -13,9 +13,176 @@ const cardVariant = {
 const MenuSelector = ({ onAddProduct, onClose }) => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [loading, setLoading] = useState(true);
   const [recommended, setRecommended] = useState([]);
+  // 🌟 Voice Ordering States
+// 🌟 Voice Ordering States
+const [isListening, setIsListening] = useState(false);
+const [voiceText, setVoiceText] = useState("");
+
+// 🌟 Number words map
+const wordToNumber = {
+  one: 1, two: 2, three: 3, four: 4, five: 5,
+  six: 6, seven: 7, eight: 8, nine: 9, ten: 10,eleven:11,twelve:12
+};
+
+// 🌟 Fuzzy matching function
+const findNearestProduct = (query) => {
+  query = query.toLowerCase().trim();
+
+  let bestMatch = null;
+  let highestScore = 0;
+
+  allProducts.forEach((p) => {
+    const name = p.name.toLowerCase();
+    const score = stringSimilarity(name, query);
+    if (score > highestScore) {
+      highestScore = score;
+      bestMatch = p;
+    }
+  });
+
+  return highestScore >= 0.6 ? bestMatch : null;
+};
+
+
+// 🌟 Simple string similarity (Jaro-Winkler / Levenshtein approximation)
+const stringSimilarity = (str1, str2) => {
+  if (!str1 || !str2) return 0;
+  str1 = str1.toLowerCase();
+  str2 = str2.toLowerCase();
+
+  const distance = levenshteinDistance(str1, str2);
+  return 1 - distance / Math.max(str1.length, str2.length);
+};
+
+// 🌟 Levenshtein distance
+const levenshteinDistance = (a, b) => {
+  const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b[i - 1] === a[j - 1]) matrix[i][j] = matrix[i - 1][j - 1];
+      else
+        matrix[i][j] =
+          1 + Math.min(matrix[i - 1][j - 1], matrix[i][j - 1], matrix[i - 1][j]);
+    }
+  }
+  return matrix[b.length][a.length];
+};
+
+
+// Start voice recognition
+const startListening = async () => {
+  if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+    return alert("Your browser does not support voice recognition");
+  }
+
+  if (products.length === 0) {
+    toast.error("Products are still loading. Try again in a moment.");
+    return;
+  }
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => setIsListening(true);
+  recognition.onend = () => setIsListening(false);
+
+recognition.onresult = (event) => {
+  const transcript = event.results[0][0].transcript;
+  setVoiceText(transcript);
+
+  // Delay parsing by 2 seconds to avoid premature timeout
+  setTimeout(() => {
+    parseVoiceOrder(transcript);
+  }, 3000); 
+};
+
+
+  recognition.start();
+};
+
+// 🌟 Enhanced parser
+const parseVoiceOrder = async (text) => {
+  if (!text || products.length === 0) return;
+
+  try {
+    let lowerText = text.toLowerCase();
+    const parts = lowerText.replace(/ and /g, ",").split(",");
+    let addedCount = 0;
+
+    for (let part of parts) {
+      part = part.trim();
+      if (!part) continue;
+
+      // Match quantity + product name
+      // Examples: "2 spring roll", "two cappuccino", "paneer butter masala"
+      const match = part.match(/(\d+|one|two|three|four|five|six|seven|eight|nine|ten)?\s*(.*)/);
+      let qtyRaw = match[1];
+      let quantity = qtyRaw
+        ? isNaN(qtyRaw)
+          ? wordToNumber[qtyRaw] || 1
+          : parseInt(qtyRaw, 10)
+        : 1;
+
+      let nameQuery = match[2].trim();
+      if (!nameQuery) continue;
+
+ // products.find ko replace karo allProducts.find se
+let product =
+  allProducts.find((p) => p.name.toLowerCase().includes(nameQuery)) ||
+  findNearestProduct(nameQuery);
+
+
+      if (product) {
+        onAddProduct({
+          product: product._id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity,
+        });
+        addedCount++;
+      } else {
+        toast.error(`Product not found: "${nameQuery}"`);
+      }
+    }
+
+    if (addedCount > 0)
+      toast.success(`${addedCount} item(s) added via voice!`);
+  } catch (err) {
+    console.error("Voice order parsing error:", err);
+    toast.error("Failed to parse voice order");
+  }
+};
+
+
+// Fetch all products for voice recognition
+useEffect(() => {
+  const fetchAllProducts = async () => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.GET_ALL_PRODUCTS, {
+        params: { includeInactive: true, limit: 500 },
+        withCredentials: true,
+      });
+      setAllProducts(res.data?.data || []);
+    } catch (err) {
+      console.log("Failed to load all products for voice ordering");
+    }
+  };
+  fetchAllProducts();
+}, []);
+
+
 
   // Fetch categories
   useEffect(() => {
@@ -74,6 +241,11 @@ const MenuSelector = ({ onAddProduct, onClose }) => {
 
   fetchRecommendations();
 }, []);
+
+
+
+
+
 
 
   // Memoized category buttons
@@ -160,6 +332,40 @@ const MenuSelector = ({ onAddProduct, onClose }) => {
     </div>
   </div>
 )}
+  {/* 🌟 Voice Ordering */}
+<div className="flex flex-col gap-3 mb-4">
+
+  {/* 🌟 Voice Order Instructions */}
+  <div className="bg-green-50/60 backdrop-blur-md p-3 rounded-xl border border-green-200">
+    <p className="text-green-900 font-medium mb-1">💡 How to give voice order:</p>
+    <ul className="text-green-800 text-sm list-disc list-inside space-y-1">
+      <li>Say quantity and product name: <strong>"2 spring roll"</strong></li>
+      <li>Combine multiple items using "and": <strong>"1 gulab jamun and 2 cappuccino"</strong></li>
+      <li>Minor spelling errors are okay: <strong>"late"</strong> → <em>latte</em></li>
+      <li>If you don’t mention quantity, 1 will be added by default</li>
+    </ul>
+  </div>
+
+  {/* 🌟 Voice Order Button */}
+  <button
+    type="button"
+    onClick={startListening}
+    disabled={isListening}
+    className={`flex-1 px-5 py-3 rounded-xl font-semibold text-white ${
+      isListening ? "bg-red-500" : "bg-blue-600 hover:bg-blue-700"
+    }`}
+  >
+    {isListening ? "🎙 Listening..." : "🎤 Give Order using Voice"}
+  </button>
+
+  {/* 🌟 Show recognized text */}
+  {voiceText && (
+    <p className="text-green-900 text-sm italic bg-white/30 backdrop-blur-md p-2 rounded">
+      You said: "{voiceText}"
+    </p>
+  )}
+</div>
+
 
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2 mb-6">{categoryButtons}</div>

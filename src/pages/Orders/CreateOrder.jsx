@@ -47,17 +47,19 @@ const CreateOrder = ({ onSuccess }) => {
   // -------------------------
   // Items Management
   // -------------------------
-  const addItem = (product) => {
-    setItems((prev) => {
-      const idx = prev.findIndex((i) => i.product === product.product);
-      if (idx !== -1) {
-        const updated = [...prev];
-        updated[idx].quantity += 1;
-        return updated;
-      }
-      return [...prev, product];
-    });
-  };
+const addItem = (product) => {
+  setItems((prev) => {
+    const idx = prev.findIndex((i) => i.product === product.product);
+    if (idx !== -1) {
+      const updated = [...prev];
+      // add the new quantity instead of just 1
+      updated[idx].quantity += product.quantity;
+      return updated;
+    }
+    return [...prev, product];
+  });
+};
+
 
   const removeItem = (index) => setItems((prev) => prev.filter((_, i) => i !== index));
 
