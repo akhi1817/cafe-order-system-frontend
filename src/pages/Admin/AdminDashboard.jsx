@@ -36,7 +36,7 @@ const AdminDashboard = () => {
       { title: "Products", route: "/admin-dashboard/products", roles: ["admin", "manager"] },
       { title: "Orders", route: "/admin-dashboard/orders", roles: ["admin", "manager"] },
       { title: "Create Orders", route: "/admin-dashboard/create-order", roles: ["admin", "manager", "staff"] },
-      { title: "All Orders", route: "/admin-dashboard/all-orders", roles: ["admin", "manager", "staff"] },
+      { title: "Staff Orders", route: "/admin-dashboard/staff-orders", roles: ["admin", "manager", "staff"] },
       { title: "Users", route: "/admin-dashboard/users", roles: ["admin", "manager"] },
       { title: "Reports", route: "/admin-dashboard/reports", roles: ["admin"] },
 
@@ -47,7 +47,7 @@ const AdminDashboard = () => {
   // Sidebar logic
   const sidebarItems = useMemo(() => {
     if (userRole === "staff") {
-      return allSidebarItems.filter((item) => ["Create Orders", "All Orders"].includes(item.title));
+      return allSidebarItems.filter((item) => ["Create Orders", "Staff Orders"].includes(item.title));
     }
     return allSidebarItems.filter((item) => item.roles.includes(userRole));
   }, [userRole, allSidebarItems]);
@@ -116,7 +116,7 @@ const AdminDashboard = () => {
                   {pendingOrdersCount === null ? <Shimmer width="w-2/3" height="h-5" /> : <span>{item.title}</span>}
 
                   {/* Pending Orders Badge */}
-               {(item.title === "Orders" || item.title === "All Orders") && (
+               {(item.title === "Orders" || item.title === "Staff Orders") && (
   <motion.span
     animate={{ scale: [1, 1.2, 1] }}
     transition={{ duration: 1, repeat: Infinity }}

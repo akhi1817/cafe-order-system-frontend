@@ -332,50 +332,7 @@ useEffect(() => {
     </div>
   </div>
 )}
-  {/* 🌟 Voice Ordering */}
-<div className="flex flex-col gap-3 mb-4">
 
-  {/* 🌟 Voice Order Instructions */}
- {/* 🌟 Voice Order Instructions */}
-<div className="bg-green-50/60 backdrop-blur-md p-3 rounded-xl border border-green-200 mb-3">
-  <p className="text-green-900 font-medium mb-1">💡 How to give voice order:</p>
-  <ul className="text-green-800 text-sm list-disc list-inside space-y-1">
-    <li>Always mention <strong>quantity first</strong> (optional, default 1 if skipped): <em>"2 spring roll"</em></li>
-    <li>Combine multiple items using <strong>"and"</strong> or commas: <em>"1 gulab jamun and 2 cappuccino"</em></li>
-    <li>Minor spelling mistakes are okay — system will auto-correct or match closest product: <em>"late"</em> → <strong>Latte</strong></li>
-    <li>Voice order works <strong>across all categories</strong> (starters, desserts, drinks, mains)</li>
-    <li>If product not found, check spelling or try saying a similar name</li>
-    <li>Speak clearly and pause <strong>2 seconds</strong> after finishing your order for processing</li>
-  </ul>
-  <p className="text-green-700 text-sm mt-2 italic">Example orders you can try:</p>
-  <ul className="text-green-800 text-sm list-disc list-inside">
-    <li>"2 spring roll and 1 gulab jamun"</li>
-    <li>"1 paneer butter masala and 2 garlic naan"</li>
-    <li>"1 latte, 2 cappuccino"</li>
-    <li>"3 french fries and 1 cold coffee"</li>
-  </ul>
-</div>
-
-
-  {/* 🌟 Voice Order Button */}
-  <button
-    type="button"
-    onClick={startListening}
-    disabled={isListening}
-    className={`flex-1 px-5 py-3 rounded-xl font-semibold text-white ${
-      isListening ? "bg-red-500" : "bg-blue-600 hover:bg-blue-700"
-    }`}
-  >
-    {isListening ? "🎙 Listening..." : "🎤 Give Order using Voice"}
-  </button>
-
-  {/* 🌟 Show recognized text */}
-  {voiceText && (
-    <p className="text-green-900 text-sm italic bg-white/30 backdrop-blur-md p-2 rounded">
-      You said: "{voiceText}"
-    </p>
-  )}
-</div>
 
 
         {/* Category Filter */}
@@ -460,6 +417,51 @@ useEffect(() => {
             ))}
           </div>
         )}
+
+          {/* 🌟 Voice Ordering */}
+<div className="flex flex-col gap-3 mb-4">
+
+  {/* 🌟 Voice Order Instructions */}
+ {/* 🌟 Voice Order Instructions */}
+<div className="bg-green-50/60 backdrop-blur-md p-3 rounded-xl border border-green-200 mb-3">
+  <p className="text-green-900 font-medium mb-1">💡 How to give voice order:</p>
+  <ul className="text-green-800 text-sm list-disc list-inside space-y-1">
+    <li>Always mention <strong>quantity first</strong> (optional, default 1 if skipped): <em>"2 spring roll"</em></li>
+    <li>Combine multiple items using <strong>"and"</strong> or commas: <em>"1 gulab jamun and 2 cappuccino"</em></li>
+    <li>Minor spelling mistakes are okay — system will auto-correct or match closest product: <em>"late"</em> → <strong>Latte</strong></li>
+    <li>Voice order works <strong>across all categories</strong> (starters, desserts, drinks, mains)</li>
+    <li>If product not found, check spelling or try saying a similar name</li>
+    <li>Speak clearly and pause <strong>2 seconds</strong> after finishing your order for processing</li>
+  </ul>
+  <p className="text-green-700 text-sm mt-2 italic">Example orders you can try:</p>
+  <ul className="text-green-800 text-sm list-disc list-inside">
+    <li>"2 spring roll and 1 gulab jamun"</li>
+    <li>"1 paneer butter masala and 2 garlic naan"</li>
+    <li>"1 latte, 2 cappuccino"</li>
+    <li>"3 french fries and 1 cold coffee"</li>
+  </ul>
+</div>
+
+
+  {/* 🌟 Voice Order Button */}
+  <button
+    type="button"
+    onClick={startListening}
+    disabled={isListening}
+    className={`flex-1 px-5 py-3 rounded-xl font-semibold text-white ${
+      isListening ? "bg-red-500" : "bg-blue-600 hover:bg-blue-700"
+    }`}
+  >
+    {isListening ? "🎙 Listening..." : "🎤 Give Order using Voice"}
+  </button>
+
+  {/* 🌟 Show recognized text */}
+  {voiceText && (
+    <p className="text-green-900 text-sm italic bg-white/30 backdrop-blur-md p-2 rounded">
+      You said: "{voiceText}"
+    </p>
+  )}
+</div>
       </div>
     </div>
   );

@@ -74,6 +74,10 @@ EDIT_ORDER_ITEMS: (id) => `${baseurl}/api/orders/${id}/edit-items`, // PATCH
 
   GET_AI_RECOMMENDATIONS: `${baseurl}/api/orders/recommendations`,  // ⭐ GET request
 
+  // 🧠 AI Daily Sales Summary
+GET_DAILY_SALES_SUMMARY: `${baseurl}/api/orders/reports/daily-summary`,
+
+
 };
 
 

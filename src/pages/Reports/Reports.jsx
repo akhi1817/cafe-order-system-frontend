@@ -26,6 +26,10 @@ export default function Reports({ refresh }) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [dailySummary, setDailySummary] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
+const [summaryLoading, setSummaryLoading] = useState(false);
+
   const itemsPerPage = 10;
 
   const cafeInfo = { name: "Café Aurora", address: "Pimpri", mobile: "9876543210" };
@@ -46,6 +50,28 @@ export default function Reports({ refresh }) {
       setLoading(false);
     }
   }, [fromDate, toDate]);
+const fetchDailySummary = async () => {
+  try {
+    setSummaryLoading(true);
+    setShowSummary(false);
+
+    // fake 5-sec loading delay
+    await new Promise((res) => setTimeout(res, 5000));
+
+    const res = await axios.get(API_ENDPOINTS.GET_DAILY_SALES_SUMMARY, {
+      withCredentials: true,
+    });
+
+    setDailySummary(res.data);
+    setShowSummary(true);
+  } catch (error) {
+    console.log("AI Summary Error:", error);
+    toast.error("Failed to load AI Summary");
+  } finally {
+    setSummaryLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchReports();
@@ -57,6 +83,7 @@ export default function Reports({ refresh }) {
     billWindow.document.close();
     billWindow.print();
   };
+  
 
   // Pagination
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -149,6 +176,64 @@ export default function Reports({ refresh }) {
       );
     })}
   </div>
+
+  <div className="flex justify-center mb-6">
+  <button
+    onClick={fetchDailySummary}
+    className="bg-green-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:bg-green-800 transition-all"
+    disabled={summaryLoading}
+  >
+    {summaryLoading ? "Analyzing Sales…" : "🔍 Generate AI Sales Summary"}
+  </button>
+</div>
+
+{/* AI Summary Section */}
+{summaryLoading && (
+  <div className="flex justify-center my-6">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-green-700"></div>
+  </div>
+)}
+
+{showSummary && dailySummary && (
+  <div className="bg-white/90 p-6 rounded-3xl shadow-2xl mb-8 border border-green-200 relative">
+
+    {/* Close Button */}
+    <button
+      onClick={() => setShowSummary(false)}
+      className="absolute top-4 right-4 text-red-600 text-xl font-bold hover:text-red-800 transition"
+      title="Close Summary"
+    >
+      ✖
+    </button>
+
+    <h2 className="text-xl md:text-2xl font-bold text-green-900 mb-4 flex items-center gap-2">
+      🤖 AI Sales Summary (Today)
+    </h2>
+
+    <p className="text-green-800 text-lg leading-relaxed mb-4">
+      {dailySummary.summary}
+    </p>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="p-4 bg-green-100 rounded-2xl shadow">
+        <div className="text-green-900 font-bold text-lg">📌 Top Item</div>
+        <div className="text-green-700 mt-1">{dailySummary.topItem || "N/A"}</div>
+      </div>
+
+      <div className="p-4 bg-green-100 rounded-2xl shadow">
+        <div className="text-green-900 font-bold text-lg">⏰ Busiest Hour</div>
+        <div className="text-green-700 mt-1">{dailySummary.busiestHour || "N/A"}</div>
+      </div>
+
+      <div className="p-4 bg-green-100 rounded-2xl shadow">
+        <div className="text-green-900 font-bold text-lg">📈 Revenue Growth</div>
+        <div className="text-green-700 mt-1">{dailySummary.revenueGrowth || "N/A"}</div>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
   {/* Top 5 Products */}
   <h3 className="text-green-900 font-semibold mb-3 text-lg md:text-xl tracking-wide">
