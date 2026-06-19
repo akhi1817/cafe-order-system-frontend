@@ -1,5 +1,7 @@
 # ☕ Cafe Order Management System
 
+⚠️ Backend is deployed on Render's free tier. Initial loading may take a few moments as the server wakes up from inactivity.
+
 ## 🔑 Demo Admin Credentials
 
 **Username:** Akhilesh
@@ -101,10 +103,16 @@ cd cafe-order-management-system
 npm install
 ```
 
-### Run Frontend
+### Start Backend Server
 
 ```bash
 npm start
+```
+
+### Run Frontend
+
+```bash
+npm run dev
 ```
 
 ### Backend Setup
